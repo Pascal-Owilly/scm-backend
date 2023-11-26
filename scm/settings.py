@@ -64,9 +64,9 @@ INSTALLED_APPS = [
     'corsheaders',
     'django_daraja',
 ]
-
     
 SWAGGER_SETTINGS = {
+    'REGISTER_URL': 'rest_framework:register',
     'LOGIN_URL': 'rest_framework:login',
     'LOGOUT_URL': 'rest_framework:logout',
 }
@@ -205,4 +205,14 @@ MEDIA_URL = '/media/' # Public URL at the browser
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Registration form modification from allauth
+ACCOUNT_AUTHENTICATION_METHOD = 'phone'  # Use 'email' or 'username' based on your preference
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'mandatory', 'optional', or 'none'
+ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_UNIQUE_USERNAME = True
+ACCOUNT_USER_MODEL_USERNAME_FIELD = None
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_PHONE_VERIFICATION = 'mandatory'  # 'none', 'optional', or 'mandatory'
 

@@ -18,8 +18,6 @@ from accounts.models import Profile
 
 from allauth.account.views import SignupView
 
-
-
 #  User role 
 
 class GetUserRole(APIView):

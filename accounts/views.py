@@ -18,6 +18,65 @@ from accounts.models import Profile
 
 from allauth.account.views import SignupView
 
+from allauth.account.views import SignupView as AllAuthSignupView
+from rest_framework import viewsets
+from rest_framework.response import Response
+from rest_framework import status
+from accounts.models import Profile
+from allauth.account.forms import SignupForm
+from rest_framework.decorators import action
+from allauth.account.views import SignupView as AllAuthSignupView
+from phonenumber_field.formfields import PhoneNumberField
+from django import forms
+from accounts.forms import CustomSignupForm
+from django.middleware.csrf import get_token
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+def get_csrf_token(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrf_token': csrf_token})
+
+class CustomSignupForm(SignupForm):
+    phone = PhoneNumberField()
+    username = forms.CharField(max_length=30, label='Username', required=False)
+    email = forms.EmailField(max_length=254, label='Email', required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(CustomSignupForm, self).__init__(*args, **kwargs)
+
+        # Check if the form has a 'username' field before modifying it
+        if 'email' in self.fields:
+            self.fields['email'].required = True
+
+    def clean(self):
+        cleaned_data = super(CustomSignupForm, self).clean()
+        username = cleaned_data.get('username')
+        email = cleaned_data.get('email')
+
+        if not username and not email:
+            raise forms.ValidationError('You must provide either a username or an email.')
+
+        return cleaned_data
+
+class RegistrationViewSet(AllAuthSignupView, viewsets.ViewSet):
+    serializer_class = ProfileSerializer
+    form_class = CustomSignupForm  # Use the custom form
+
+    def create(self, request, *args, **kwargs):
+        response = super().create(request, *args, **kwargs)
+        if response.status_code == status.HTTP_201_CREATED:
+            user = response.data.get('user', {})
+            profile_data = {
+                'user_id': user.get('id'),
+                'first_name': request.data.get('first_name'),
+                'last_name': request.data.get('last_name'),
+                'phone_number': request.data.get('phone_number')
+            }
+            profile = Profile.objects.create(**profile_data)
+        return response
+        
 #  User role 
 
 class GetUserRole(APIView):

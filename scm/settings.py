@@ -48,7 +48,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts.apps.AccountsConfig',
-
+    'inventory_management.apps.InventoryManagementConfig',
+    'transaction.apps.TransactionConfig',
         # 3rd party
 
     "rest_framework",

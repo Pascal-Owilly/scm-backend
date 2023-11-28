@@ -8,10 +8,18 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from accounts.views import Profile, ProfileViewset
 from accounts import views
-
+from inventory_management.views import InventoryViewSet
+from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentViewSet
 router = DefaultRouter()
 
 router.register(r'profile', ProfileViewset)
+router.register(r'inventory', InventoryViewSet)
+# transaction
+
+router.register(r'abattoirs', AbattoirViewSet)
+router.register(r'breaders', BreaderViewSet)
+router.register(r'breader-trade', BreaderTradeViewSet)
+router.register(r'abattoir-payments', AbattoirPaymentViewSet)
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -28,7 +36,7 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('profile/', include(router.urls)),
+    path('api/', include(router.urls)),
     path('authentication/', include('accounts.urls')),
     path('api/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),

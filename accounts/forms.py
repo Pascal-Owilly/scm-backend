@@ -26,4 +26,4 @@ class CustomSignupForm(SignupForm):
             raise forms.ValidationError('You must provide either a username or an email.')
 
         return cleaned_data
-
+# main reg

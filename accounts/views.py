@@ -34,6 +34,11 @@ from django.middleware.csrf import get_token
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+
+def get_csrf_token(request):
+    csrf_token = get_token(request)
+    return JsonResponse({'csrf_token': csrf_token})
+
 class CustomSignupForm(SignupForm):
     phone = PhoneNumberField()
     username = forms.CharField(max_length=30, label='Username', required=False)

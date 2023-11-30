@@ -233,3 +233,15 @@ MEDIA_URL = '/media/' # Public URL at the browser
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Registration form modification from allauth
+ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
+
+ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use 'email' or 'username' based on your preference
+ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'mandatory', 'optional', or 'none'
+ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
+ACCOUNT_UNIQUE_EMAIL = True
+ACCOUNT_UNIQUE_USERNAME = False
+# ACCOUNT_USER_MODEL_USERNAME_FIELD = False
+ACCOUNT_USERNAME_REQUIRED = False
+ACCOUNT_PHONE_VERIFICATION = 'mandatory'  # 'none', 'optional', or 'mandatory'
+

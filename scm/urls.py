@@ -10,6 +10,30 @@ from accounts.views import Profile, ProfileViewset
 from accounts import views
 from inventory_management.views import InventoryViewSet
 from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentViewSet
+from dj_rest_auth.registration.views import (
+    ResendEmailVerificationView,
+    VerifyEmailView,
+)
+from dj_rest_auth.views import (
+    PasswordResetView,
+    LoginView,
+    UserDetailsView,
+    LogoutView,
+)
+from allauth.account.views import (
+    LoginView as AllAuthLoginView,
+    LogoutView as AllAuthLogoutView,
+    PasswordResetDoneView as AllAuthPasswordResetDoneView,
+)
+
+from accounts.views import (
+    Profile,
+    ProfileViewset,
+    email_confirm_redirect,
+    password_reset_confirm_redirect,
+    GetUserRole,
+)
+
 router = DefaultRouter()
 
 router.register(r'profile', ProfileViewset)
@@ -37,6 +61,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
     path('authentication/', include('accounts.urls')),
     path('api/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),

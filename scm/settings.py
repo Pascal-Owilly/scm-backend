@@ -52,14 +52,15 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL = True
+CSRF_TRUSTED_ORIGINS = ['http://localhost:5173']
 
-CORS_ORIGIN_WHITELIST = [
-    'http://localhost:3000',
-    'https://127.0.0.1:3000',
-    'https://127.0.0.1',
-    'http://localhost:5173',
-    # 'vercel.app',
-]
+# CORS_ORIGIN_WHITELIST = [
+#     'http://localhost:3000',
+#     'https://127.0.0.1:3000',
+#     'https://127.0.0.1',
+#     'http://localhost:5173',
+#     # 'vercel.app',
+# ]
 # Application definition
 
 INSTALLED_APPS = [

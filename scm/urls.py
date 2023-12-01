@@ -10,7 +10,7 @@ from accounts.views import Profile, ProfileViewset
 from accounts import views
 from inventory_management.views import InventoryViewSet
 from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentViewSet
-from accounts.views import get_csrf_token
+# from accounts.views import get_csrf_token
 
 from dj_rest_auth.registration.views import (
     ResendEmailVerificationView,
@@ -31,8 +31,8 @@ from allauth.account.views import (
 from accounts.views import (
     Profile,
     ProfileViewset,
-    email_confirm_redirect,
-    password_reset_confirm_redirect,
+    # email_confirm_redirect,
+    # password_reset_confirm_redirect,
     GetUserRole,
 )
 
@@ -63,9 +63,9 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    path('api/csrf_token/', get_csrf_token, name='csrf_token'),
+    # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
     path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
-    path('authentication/', include('accounts.urls')),
+    path('auth/', include('accounts.urls')),
     path('drf/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

@@ -14,14 +14,23 @@ class Breader(models.Model):
         return self.user.username
 
 class BreaderTrade(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)  # associate the trade with a user
     breader = models.ForeignKey(Breader, on_delete=models.CASCADE)
     abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
     transaction_date = models.DateTimeField(auto_now_add=True)
-    breads_supplied = models.PositiveIntegerField()
+    breads_supplied = models.PositiveIntegerField(default=0)
+    goat_weight = models.PositiveIntegerField(default=0)
+    community = models.CharField(max_length=255, default='Example ABC Community')
+    market = models.CharField(max_length=255, default='ABC Market')
+    head_of_family = models.CharField(max_length=255, default='Example ABC Family')
+    vaccinated = models.BooleanField(default=False)
+    animal_name = models.CharField(max_length=255, default='eg goats, cows... etc')
+
 
     def __str__(self):
-        return f"{self.breader} supplied {self.breads_supplied} to {self.abattoir} on {self.transaction_date}"
-
+        formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')  # Adjust the format as needed
+        return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.animal_name} to {self.abattoir} on {formatted_date}"
+                        
 class AbattoirPayment(models.Model):
     abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
     transaction = models.OneToOneField(BreaderTrade, on_delete=models.CASCADE)

@@ -33,11 +33,32 @@ from accounts.forms import CustomSignupForm
 from django.middleware.csrf import get_token
 
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_exempt, ensure_csrf_cookie
+import logging
 
+logger = logging.getLogger(__name__)
+
+@ensure_csrf_cookie
 def get_csrf_token(request):
     csrf_token = get_token(request)
-    return JsonResponse({'csrf_token': csrf_token})
+
+    # Set the Access-Control-Allow-Headers header
+    response = JsonResponse({'csrf_token': csrf_token})
+    response['Access-Control-Allow-Headers'] = 'X-CSRFToken'
+    response['Access-Control-Allow-Origin'] = 'http://localhost:5173'  # Replace with your frontend URL
+
+    # Logging for debugging
+    logger.debug('Received Headers: %s', request.headers)
+    csrf_header_value = request.META.get('HTTP_X_CSRFTOKEN', None)
+    logger.debug('X-CSRFToken Header (from request): %s', csrf_header_value)
+    logger.debug('Token CSRF (from request): %s', csrf_token)
+
+    # Additional logging using print statements
+    print('Received Headers:', request.headers)
+    print('X-CSRFToken Header (from request):', csrf_header_value)
+    print('Token CSRF (from request):', csrf_token)
+
+    return response
 
 class CustomSignupForm(SignupForm):
     phone = PhoneNumberField()

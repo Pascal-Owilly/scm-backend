@@ -206,32 +206,32 @@ MEDIA_URL = '/media/' # Public URL at the browser
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Registration form modification from allauth
-ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
+# ACCOUNT_FORMS = {'signup': 'accounts.forms.CustomSignupForm'}
 
-ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use 'email' or 'username' based on your preference
-ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'mandatory', 'optional', or 'none'
-ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
-ACCOUNT_UNIQUE_EMAIL = True
-ACCOUNT_UNIQUE_USERNAME = True
-# ACCOUNT_USER_MODEL_USERNAME_FIELD = False
-ACCOUNT_USERNAME_REQUIRED = False
-ACCOUNT_PHONE_VERIFICATION = 'none'  # 'none', 'optional', or 'mandatory'
+# ACCOUNT_AUTHENTICATION_METHOD = 'email'  # Use 'email' or 'username' based on your preference
+# ACCOUNT_EMAIL_VERIFICATION = 'none'  # 'mandatory', 'optional', or 'none'
+# ACCOUNT_SIGNUP_EMAIL_ENTER_TWICE = False
+# ACCOUNT_UNIQUE_EMAIL = True
+# ACCOUNT_UNIQUE_USERNAME = True
+# # ACCOUNT_USER_MODEL_USERNAME_FIELD = False
+# ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_PHONE_VERIFICATION = 'none'  # 'none', 'optional', or 'mandatory'
 
-CSRF_COOKIE_SECURE = False  # Set to True in production if using HTTPS
-CSRF_COOKIE_SAMESITE = 'None'  # Adjust as needed
+# CSRF_COOKIE_SECURE = False  # Set to True in production if using HTTPS
+# CSRF_COOKIE_SAMESITE = 'None'  # Adjust as needed
 
-CSRF_COOKIE_DOMAIN = 'http://localhost:5173'
-CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_HEADERS = [
-    'Access-Control-Allow-Headers',
-    'Content-Type',
-    'X-CSRFToken',
-]
+# CSRF_COOKIE_DOMAIN = 'http://localhost:5173'
+# CORS_ALLOW_CREDENTIALS = True
+# CORS_ALLOW_HEADERS = [
+#     'Access-Control-Allow-Headers',
+#     'Content-Type',
+#     'X-CSRFToken',
+# ]
 
 ALLOWED_HOSTS = ['*']  
 
 
 CORS_ALLOW_ALL_ORIGINS = True  # Set to True for development, configure specific origins in production
-CSRF_TRUSTED_ORIGINS = ['http://*.localhost:5173','https://*.localhost:5173','https://127.0.0.1:8000', 'https://127.0.0.1', 'https://127.0.0.1:5173',]
-ALLOWED_ORIGINS = ['*']
-CSRF_COOKIE_AGE = None
+# CSRF_TRUSTED_ORIGINS = ['http://*.localhost:5173','https://*.localhost:5173','https://127.0.0.1:8000', 'https://127.0.0.1', 'https://127.0.0.1:5173',]
+# ALLOWED_ORIGINS = ['*']
+# CSRF_COOKIE_AGE = None

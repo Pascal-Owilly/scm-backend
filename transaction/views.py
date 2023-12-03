@@ -1,10 +1,12 @@
-# views.py
-
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Abattoir, Breader, BreaderTrade, AbattoirPayment
-from .serializers import AbattoirSerializer, BreaderSerializer, BreaderTradeSerializer, AbattoirPaymentSerializer
+from .models import Abattoir, Breader, BreaderTrade, AbattoirPaymentToBreader
+from .serializers import AbattoirSerializer, BreaderSerializer, BreaderTradeSerializer, AbattoirPaymentToBreaderSerializer
 import logging
+from rest_framework.decorators import action
+from django.http import JsonResponse
+from rest_framework.views import APIView
+
 
 class AbattoirViewSet(viewsets.ModelViewSet):
     queryset = Abattoir.objects.all()
@@ -17,7 +19,7 @@ class BreaderViewSet(viewsets.ModelViewSet):
 logger = logging.getLogger(__name__)
 
 class BreaderTradeViewSet(viewsets.ModelViewSet):
-    queryset = BreaderTrade.objects.all()
+    queryset = BreaderTrade.objects.all().order_by('-transaction_date')
     serializer_class = BreaderTradeSerializer
 
     def create(self, request, *args, **kwargs):
@@ -34,8 +36,31 @@ class BreaderTradeViewSet(viewsets.ModelViewSet):
             print(f"Error in creating BreaderTrade: {str(e)}")
             # Return a response indicating the error
             return Response({"error": "An error occurred while creating BreaderTrade."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    @action(detail=True, methods=['get'])
+    def breader_info(self, request, pk=None):
+        """
+        Retrieve detailed information about a specific BreaderTrade.
 
+        Example URL: /api/breader-trade/{pk}/breader-info/
+        """
+        try:
+            breader_trade = self.get_object()
+            breader_data = BreaderSerializer(breader_trade.breader).data
+            return Response(breader_data)
+        except Exception as e:
+            # Log the exception
+            logger.error(f"Error in retrieving Breader information: {str(e)}")
+            # Print the error to the console during development
+            print(f"Error in retrieving Breader information: {str(e)}")
+            # Return a response indicating the error
+            return Response({"error": "An error occurred while retrieving Breader information."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-class AbattoirPaymentViewSet(viewsets.ModelViewSet):
-    queryset = AbattoirPayment.objects.all()
-    serializer_class = AbattoirPaymentSerializer
+class BreaderCountView(APIView):
+    def get(self, request, format=None):
+        breader_count = Breader.objects.count()
+        return Response({'breader_count': breader_count}, status=status.HTTP_200_OK)
+
+class AbattoirPaymentToBreaderViewSet(viewsets.ModelViewSet):
+    queryset = AbattoirPaymentToBreader.objects.all()
+    serializer_class = AbattoirPaymentToBreaderSerializer
+

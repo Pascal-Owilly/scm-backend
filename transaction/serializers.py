@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from transaction.models import Abattoir, Breader, BreaderTrade, AbattoirPayment
+from transaction.models import Abattoir, Breader, BreaderTrade, AbattoirPaymentToBreader
 
 class AbattoirSerializer(serializers.ModelSerializer):
     class Meta:
@@ -17,7 +17,7 @@ class BreaderTradeSerializer(serializers.ModelSerializer):
         model = BreaderTrade
         fields = '__all__'
 
-class AbattoirPaymentSerializer(serializers.ModelSerializer):
+class AbattoirPaymentToBreaderSerializer(serializers.ModelSerializer):
     class Meta:
-        model = AbattoirPayment
+        model = AbattoirPaymentToBreader
         fields = '__all__'

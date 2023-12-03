@@ -9,9 +9,9 @@ from rest_framework.routers import DefaultRouter
 from accounts.views import Profile, ProfileViewset
 from accounts import views
 from inventory_management.views import InventoryViewSet
-from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentViewSet
+from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView
 # from accounts.views import get_csrf_token
-
+from mpesa_payments.views import MpesaPaymentView
 from dj_rest_auth.registration.views import (
     ResendEmailVerificationView,
     VerifyEmailView,
@@ -45,7 +45,8 @@ router.register(r'inventory', InventoryViewSet)
 router.register(r'abattoirs', AbattoirViewSet)
 router.register(r'breaders', BreaderViewSet)
 router.register(r'breader-trade', BreaderTradeViewSet)
-router.register(r'abattoir-payments', AbattoirPaymentViewSet)
+router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
+router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -56,13 +57,15 @@ schema_view = get_schema_view(
       license=openapi.License(name="BSD License"),
    ),
 
-   public=False,
+   public=True,
    permission_classes=(permissions.AllowAny,),
 )
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
+    path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
     path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
     path('auth/', include('accounts.urls')),

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 from pathlib import Path
 import os
 import datetime
+from decouple import config, Csv
 
 # settings.py
 
@@ -58,6 +59,7 @@ CORS_ORIGIN_WHITELIST = [
     'https://127.0.0.1:3000',
     'https://127.0.0.1',
     'http://localhost:5173',
+    'http://localhost:5174',
     # 'vercel.app',
 ]
 # Application definition
@@ -72,6 +74,8 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'inventory_management.apps.InventoryManagementConfig',
     'transaction.apps.TransactionConfig',
+    'mpesa_payments.apps.MpesaPaymentsConfig',
+
         # 3rd party
 
     "rest_framework",
@@ -86,7 +90,27 @@ INSTALLED_APPS = [
     'drf_yasg',
     'corsheaders',
     'django_daraja',
+    'phonenumber_field',
+
 ]
+
+# MPESA CREDENTIALS
+consumer_key=config('consumer_key')
+consumer_secret=config('consumer_secret')
+shortcode=config('shortcode')
+pass_key=config('pass_key')
+access_token_url=config('access_token_url')
+checkout_url=config('checkout_url')
+
+MPESA_ENVIRONMENT = 'sandbox'
+MPESA_CONSUMER_KEY = config('consumer_key')
+MPESA_CONSUMER_SECRET = config('consumer_secret')
+MPESA_EXPRESS_SHORTCODE = config('shortcode')
+MPESA_SHORTCODE_TYPE = 'paybill'
+MPESA_PASSKEY = config('mpesa_pass_key')
+MPESA_INITIATOR_USERNAME = config('initator_user_name')
+MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
+
 
 
 SWAGGER_SETTINGS = {
@@ -220,9 +244,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
+# STATICFILES_DIRS = os.path.join(BASE_DIR, 'static'),
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
-
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # Directory where uploaded media is saved.
 

@@ -11,8 +11,8 @@ class SlaughterhouseRecord(models.Model):
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     inventory_breed = models.ForeignKey(InventoryBreed, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"Slaughterhouse Record - Date: {self.slaughter_date}, Part: {self.get_part_name_display()}, Quantity: {self.quantity}"

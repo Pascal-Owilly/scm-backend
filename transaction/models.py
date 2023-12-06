@@ -25,7 +25,7 @@ class BreaderTrade(models.Model):
         # Add more choices as needed
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     breader = models.ForeignKey(Breader, on_delete=models.CASCADE)
     abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
     transaction_date = models.DateTimeField(auto_now_add=True)

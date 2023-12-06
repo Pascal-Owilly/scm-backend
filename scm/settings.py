@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'inventory_management.apps.InventoryManagementConfig',
     'transaction.apps.TransactionConfig',
+    'slaughter_house.apps.SlaughterHouseConfig',
     'mpesa_payments.apps.MpesaPaymentsConfig',
     'custom_registration.apps.CustomRegistrationConfig',
 

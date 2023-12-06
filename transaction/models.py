@@ -43,7 +43,7 @@ class BreaderTrade(models.Model):
     
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
-        return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.breed_name}'s to {self.abattoir} on {formatted_date}"
+        return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.animal_name_name}'s to {self.abattoir} on {formatted_date}"
 
 class AbattoirPaymentToBreader(models.Model):
     breader_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)

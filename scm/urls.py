@@ -9,7 +9,8 @@ from rest_framework.routers import DefaultRouter
 from accounts.views import Profile, ProfileViewset
 from accounts import views
 from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView
-from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet
+from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet
+from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
 from dj_rest_auth.registration.views import (
@@ -49,6 +50,8 @@ router.register(r'inventory-breed-sales', InventoryBreedSalesViewSet)
 
 router.register(r'abattoirs', AbattoirViewSet)
 router.register(r'breaders', BreaderViewSet)
+router.register(r'breed-cut', BreedCutViewSet)
+router.register(r'breed-part-count', SlaughterhouseRecordViewSet)
 router.register(r'breader-trade', BreaderTradeViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')

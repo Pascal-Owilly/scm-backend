@@ -6,6 +6,7 @@ from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from .choices import BREED_CHOICES
 from transaction.models import BreaderTrade
+from django.db.models import Sum  # Import Sum here
 
 class InventoryBreed(models.Model):
     STATUS_CHOICES = [
@@ -33,16 +34,16 @@ class InventoryBreedSales(models.Model):
     ]
 
     PART_CHOICES = [
-        ('thighs', 'Thighs'),
-        ('ribs', 'Ribs'),
-        ('loin', 'Loin'),
-        ('shoulder', 'Shoulder'),
-        ('shanks', 'Shanks'),
-        ('organ_meat', 'Organ Meat'),
-        ('intestines', 'Intestines'),
-        ('tripe', 'Tripe'),
-        ('sweetbreads', 'Sweetbreads'),
-    ]
+    ('thighs', 'Thighs'),
+    ('ribs', 'Ribs'),
+    ('loin', 'Loin'),
+    ('shoulder', 'Shoulder'),
+    ('shanks', 'Shanks'),
+    ('organ_meat', 'Organ Meat'),
+    ('intestines', 'Intestines'),
+    ('tripe', 'Tripe'),
+    ('sweetbreads', 'Sweetbreads'),
+]
 
     breed = models.ForeignKey(InventoryBreed, on_delete=models.CASCADE)
     part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
@@ -66,7 +67,7 @@ class BreedCut(models.Model):
     part_name = models.CharField(max_length=255, choices=InventoryBreedSales.PART_CHOICES)
     sale_type = models.CharField(max_length=255, choices=InventoryBreedSales.SALE_CHOICES)
     quantity = models.PositiveIntegerField()
-    quantity_left = models.PositiveIntegerField(default=0)  # New field for parts left
+    quantity_left = models.PositiveIntegerField(default=0, editable=False)  # Set editable=False to make it read-only in admin
     sale_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_warehouse')
 
@@ -74,9 +75,11 @@ class BreedCut(models.Model):
         return f"{self.breed} - {self.get_part_name_display()} - {self.get_sale_type_display()} - Status: {self.get_status_display()}"
 
     def save(self, *args, **kwargs):
-        # Calculate and update quantity_left before saving
         if self.status == 'sold':
-            self.quantity_left = max(self.quantity - self.quantity_sold(), 0)
+            # Calculate quantity_left based on the total quantity sold
+            total_quantity_sold = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, sale_type=self.sale_type, status='sold').aggregate(Sum('quantity'))['quantity__sum'] or 0
+            self.quantity_left = max(self.quantity - total_quantity_sold, 0)
+
         super().save(*args, **kwargs)
 
     def quantity_sold(self):

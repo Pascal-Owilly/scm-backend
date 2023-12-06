@@ -50,10 +50,13 @@ SECRET_KEY = 'django-insecure-$d8&01e=mjlo33y+47z0fm^1(0rj@l&s5lyus!97mbuufp%r#%
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost:5173']
 
 CORS_ORIGIN_ALLOW_ALL = True
-
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",  # Add your React frontend's origin
+    "http://127.0.0.1:5173",  # Add your React frontend's origin
+]
 CORS_ORIGIN_WHITELIST = [
     'http://localhost:3000',
     'https://127.0.0.1:3000',
@@ -75,10 +78,12 @@ INSTALLED_APPS = [
     'inventory_management.apps.InventoryManagementConfig',
     'transaction.apps.TransactionConfig',
     'mpesa_payments.apps.MpesaPaymentsConfig',
+    'custom_registration.apps.CustomRegistrationConfig',
 
         # 3rd party
 
     "rest_framework",
+    # 'rest_framework_jwt',
     "rest_framework.authtoken",
     "allauth",
     "allauth.account",
@@ -139,9 +144,9 @@ SESSION_COOKIE_AGE = 1209600  # Set the session cookie's age (2 weeks in seconds
 ROOT_URLCONF = 'scm.urls'
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

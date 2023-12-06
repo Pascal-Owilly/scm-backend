@@ -1,8 +1,14 @@
-from rest_framework import serializers
-from inventory_management.models import Inventory
+# serializers.py
 
-class InventorySerializer(serializers.ModelSerializer):
-    
+from rest_framework import serializers
+from .models import InventoryBreed, InventoryBreedSales
+
+class InventoryBreedSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Inventory
+        model = InventoryBreed
+        fields = '__all__'
+
+class InventoryBreedSalesSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = InventoryBreedSales
         fields = '__all__'

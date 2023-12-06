@@ -8,8 +8,8 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from accounts.views import Profile, ProfileViewset
 from accounts import views
-from inventory_management.views import InventoryViewSet
 from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView
+from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
 from dj_rest_auth.registration.views import (
@@ -39,8 +39,13 @@ from accounts.views import (
 router = DefaultRouter()
 
 router.register(r'profile', ProfileViewset)
-router.register(r'inventory', InventoryViewSet)
-# transaction
+
+# breed sales from transaction
+
+router.register(r'inventory-breed-name', InventoryBreedViewSet)
+router.register(r'inventory-breed-sales', InventoryBreedSalesViewSet)
+
+# Inventory management
 
 router.register(r'abattoirs', AbattoirViewSet)
 router.register(r'breaders', BreaderViewSet)
@@ -69,6 +74,7 @@ urlpatterns = [
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
     path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
     path('auth/', include('accounts.urls')),
+    path('registration/', include('custom_registration.urls')),
     path('drf/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

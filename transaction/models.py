@@ -3,6 +3,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 class Abattoir(models.Model):
     name = models.CharField(max_length=100)
@@ -36,7 +38,6 @@ class BreaderTrade(models.Model):
     market = models.CharField(max_length=255, default='ABC Market')
     head_of_family = models.CharField(max_length=255, default='Example ABC Family')
     vaccinated = models.BooleanField(default=False)
-    update_total_quantity=models.PositiveIntegerField(default=0)
     # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     phone_number = PhoneNumberField(null=True)
@@ -45,12 +46,12 @@ class BreaderTrade(models.Model):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
         return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
 
-    @receiver(post_save, sender='transaction.BreaderTrade')
-    def update_inventory_breed(sender, instance, **kwargs):
-        from inventory_management.models import InventoryBreed
-        inventory_breed = InventoryBreed.objects.filter(breed=instance.breed).first()
-        if inventory_breed:
-            inventory_breed.update_total_quantity()
+@receiver(post_save, sender=BreaderTrade)
+def update_breads_supplied(sender, instance, created, **kwargs):
+    if created:  # Only update if the instance is newly created
+        # Assuming you have a related field in Breader model named 'total_breads_supplied'
+        instance.breader.total_breads_supplied += instance.breads_supplied
+        instance.breader.save()
 
 class AbattoirPaymentToBreader(models.Model):
     breader_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)

@@ -48,28 +48,10 @@ class BreedCut(models.Model):
 
 class InventoryBreed(models.Model):
     breed = models.CharField(max_length=255, choices=BreaderTrade.BREED_CHOICES, default='goats')
-    total_quantity = models.PositiveIntegerField(default=0)
-
-    def update_total_quantity(self):
-        # Update total quantity based on BreaderTrade records
-        total_breads_supplied = BreaderTrade.objects.filter(breed=self.breed).aggregate(total_breads_supplied=models.Sum('breads_supplied'))['total_breads_supplied'] or 0
-
-        # Calculate the total quantity
-        self.total_quantity = total_breads_supplied
-        self.save()
-
+    
     def __str__(self):
-        return f"InventoryBreed - Breed: {self.breed}, Total Quantity: {self.total_quantity}"
+        return f"InventoryBreed - Breed: {self.breed}"
 
-# Signal to update InventoryBreed when a BreaderTrade is saved
-@receiver(post_save, sender=BreaderTrade)
-def update_inventory_breed(sender, instance, **kwargs):
-    # Assuming InventoryBreed has a ForeignKey to BreaderTrade named 'breader_trade'
-    # Adjust the following line based on your actual ForeignKey field
-    breads_supplied = instance.breader.user.username
-
-    if breads_supplied:
-        breads_supplied.update_total_quantity()
         
 class InventoryBreedSales(models.Model):
     

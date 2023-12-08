@@ -12,7 +12,7 @@ class Abattoir(models.Model):
 
 class Breader(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-   
+    
     def __str__(self):
         return self.user.username
 
@@ -36,16 +36,21 @@ class BreaderTrade(models.Model):
     market = models.CharField(max_length=255, default='ABC Market')
     head_of_family = models.CharField(max_length=255, default='Example ABC Family')
     vaccinated = models.BooleanField(default=False)
-    
+    update_total_quantity=models.PositiveIntegerField(default=0)
     # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     phone_number = PhoneNumberField(null=True)
-
-    # Add the field to track total quantity supplied
     
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
         return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
+
+    @receiver(post_save, sender='transaction.BreaderTrade')
+    def update_inventory_breed(sender, instance, **kwargs):
+        from inventory_management.models import InventoryBreed
+        inventory_breed = InventoryBreed.objects.filter(breed=instance.breed).first()
+        if inventory_breed:
+            inventory_breed.update_total_quantity()
 
 class AbattoirPaymentToBreader(models.Model):
     breader_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)

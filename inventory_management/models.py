@@ -9,6 +9,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from .choices import BREED_CHOICES,PART_CHOICES, SALE_CHOICES, STATUS_CHOICES
 from transaction.models import BreaderTrade
 from django.db.models import Sum  # Import Sum here
+from slaughter_house.models import SlaughterhouseRecord
 
 class BreedCut(models.Model):   
 
@@ -46,16 +47,30 @@ class BreedCut(models.Model):
         super().save(*args, **kwargs)
 
 class InventoryBreed(models.Model):
-    breed = models.CharField(max_length=255, choices=BREED_CHOICES, unique=True, null=True, default='goats')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_the_warehouse')
-    quantity = models.PositiveIntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    breed = models.CharField(max_length=255, choices=BreaderTrade.BREED_CHOICES, default='goats')
+    total_quantity = models.PositiveIntegerField(default=0)
+
+    def update_total_quantity(self):
+        # Update total quantity based on BreaderTrade records
+        total_breads_supplied = BreaderTrade.objects.filter(breed=self.breed).aggregate(total_breads_supplied=models.Sum('breads_supplied'))['total_breads_supplied'] or 0
+
+        # Calculate the total quantity
+        self.total_quantity = total_breads_supplied
+        self.save()
 
     def __str__(self):
-        return f"{self.get_breed_display()} - Status: {self.get_status_display()}, Quantity: {self.quantity}"
+        return f"InventoryBreed - Breed: {self.breed}, Total Quantity: {self.total_quantity}"
 
+# Signal to update InventoryBreed when a BreaderTrade is saved
+@receiver(post_save, sender=BreaderTrade)
+def update_inventory_breed(sender, instance, **kwargs):
+    # Assuming InventoryBreed has a ForeignKey to BreaderTrade named 'breader_trade'
+    # Adjust the following line based on your actual ForeignKey field
+    breads_supplied = instance.breader.user.username
+
+    if breads_supplied:
+        breads_supplied.update_total_quantity()
+        
 class InventoryBreedSales(models.Model):
     
     PART_CHOICES = [
@@ -143,19 +158,19 @@ def update_sale_quantity(sender, instance, **kwargs):
         breed.quantity -= instance.quantity
 
 @receiver(post_save, sender=BreaderTrade)
-def update_inventory_breed_quantity(sender, instance, created, **kwargs):
+def update_breads_supplied_quantity(sender, instance, created, **kwargs):
     if created:
         breed = instance.breed
         try:
             # Use filter instead of get to handle multiple instances
-            inventory_breeds = BreedCut.objects.filter(sales__part_name=part_name)
+            breads_supplied = BreedCut.objects.filter(sales__part_name=part_name)
             
-            if inventory_breeds.exists():
+            if breads_supplied.exists():
                 # Assuming you want to update the first instance
-                inventory_breed = inventory_breeds.first()
-                inventory_breed.quantity += instance.breads_supplied
-                inventory_breed.status = 'in_yard'  # Set the status here if needed
-                inventory_breed.save()
+                breads_supplied = breads_supplied.first()
+                breads_supplied.quantity += instance.breads_supplied
+                breads_supplied.status = 'in_yard'  # Set the status here if needed
+                breads_supplied.save()
             else:
                 # Create a new InventoryBreed entry if it doesn't exist
                 InventoryBreed.objects.create(

@@ -1,7 +1,8 @@
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
-
 
 class Abattoir(models.Model):
     name = models.CharField(max_length=100)
@@ -25,11 +26,10 @@ class BreaderTrade(models.Model):
         # Add more choices as needed
     ]
 
-    # user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     breader = models.ForeignKey(Breader, on_delete=models.CASCADE)
     abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
     transaction_date = models.DateTimeField(auto_now_add=True)
-    breed_name = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
+    breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
     breads_supplied = models.PositiveIntegerField(default=0)
     goat_weight = models.PositiveIntegerField(default=0)
     community = models.CharField(max_length=255, default='Example ABC Community')
@@ -40,10 +40,12 @@ class BreaderTrade(models.Model):
     # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     phone_number = PhoneNumberField(null=True)
+
+    # Add the field to track total quantity supplied
     
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
-        return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.animal_name_name}'s to {self.abattoir} on {formatted_date}"
+        return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
 
 class AbattoirPaymentToBreader(models.Model):
     breader_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)

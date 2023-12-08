@@ -1,41 +1,66 @@
+from django.apps import apps
+
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
-from .choices import BREED_CHOICES
+from .choices import BREED_CHOICES,PART_CHOICES, SALE_CHOICES, STATUS_CHOICES
 from transaction.models import BreaderTrade
 from django.db.models import Sum  # Import Sum here
 
-class InventoryBreed(models.Model):
-    STATUS_CHOICES = [
-        ('in_yard', 'In Yard'),
-        ('slaughtered', 'Slaughtered'),
-        ('sold', 'Sold'),
-    ]
+class BreedCut(models.Model):   
 
-    breed_name = models.CharField(max_length=255, choices=BREED_CHOICES, unique=True, null=True, default='goats')
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_yard')
+    breed = models.CharField(max_length=255, choices=BREED_CHOICES)
+    part_name = models.CharField(max_length=255, choices=PART_CHOICES)
+    sale_type = models.CharField(max_length=255, choices=SALE_CHOICES)
+    quantity = models.PositiveIntegerField()
+    quantity_left = models.PositiveIntegerField(default=0, editable=False)
+    sale_date = models.DateField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_warehouse')
+
+    def __str__(self):
+        return f"{self.get_breed_display()} - {self.get_part_name_display()} - {self.get_sale_type_display()} - Status: {self.get_status_display()}"
+
+    def save(self, *args, **kwargs):
+        if self.status == 'in_warehouse':
+            # Update quantity_left based on total quantity of the specific part for the breed cuts
+            total_quantity = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, status='in_warehouse').aggregate(Sum('quantity'))['quantity__sum'] or 0
+            self.quantity_left = total_quantity + self.quantity
+
+            # If it's a new local sales part, add to the local sales quantity
+            if self.sale_type == 'local_sales_cuts':
+                local_sales_quantity = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, sale_type='local_sales_cuts', status='in_warehouse').aggregate(Sum('quantity'))['quantity__sum'] or 0
+                self.quantity_left += local_sales_quantity
+            # If it's a new export part, add to the export quantity
+            elif self.sale_type == 'export_cuts':
+                export_quantity = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, sale_type='export_cuts', status='in_warehouse').aggregate(Sum('quantity'))['quantity__sum'] or 0
+                self.quantity_left += export_quantity
+
+        elif self.status == 'sold':
+            # Adjust quantity_left when the specific part of breed cuts are sold
+            total_quantity_sold = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, status='sold').aggregate(Sum('quantity'))['quantity__sum'] or 0
+            self.quantity_left = max(total_quantity - total_quantity_sold, 0)
+
+        super().save(*args, **kwargs)
+
+class InventoryBreed(models.Model):
+    breed = models.CharField(max_length=255, choices=BREED_CHOICES, unique=True, null=True, default='goats')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_the_warehouse')
     quantity = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"{self.get_breed_name_display()} - Status: {self.get_status_display()}, Quantity: {self.quantity}"
-
+        return f"{self.get_breed_display()} - Status: {self.get_status_display()}, Quantity: {self.quantity}"
 
 class InventoryBreedSales(models.Model):
     
-    SALE_CHOICES = [
-        ('export_cuts', 'Export Cuts'),
-        ('local_sales_cuts', 'Local Sales Cuts'),
-    ]
-
     PART_CHOICES = [
-    ('thighs', 'Thighs'),
     ('ribs', 'Ribs'),
+    ('thighs', 'Thighs'),
     ('loin', 'Loin'),
     ('shoulder', 'Shoulder'),
     ('shanks', 'Shanks'),
@@ -45,7 +70,13 @@ class InventoryBreedSales(models.Model):
     ('sweetbreads', 'Sweetbreads'),
 ]
 
-    breed = models.ForeignKey(InventoryBreed, on_delete=models.CASCADE)
+    STATUS_CHOICES = [
+        ('in_the warehouse', 'In The Warehouse'),
+        ('slaughtered', 'Slaughtered'),
+        ('sold', 'Sold'),
+    ]
+
+    breed = models.ForeignKey(BreedCut, on_delete=models.CASCADE)
     part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
     sale_type = models.CharField(max_length=255, choices=SALE_CHOICES)
     quantity = models.PositiveIntegerField()
@@ -55,36 +86,7 @@ class InventoryBreedSales(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
-        return f"{self.breed} - {self.get_part_name_display()} - {self.get_sale_type_display()}"
-
-class BreedCut(models.Model):
-    STATUS_CHOICES = [
-        ('in_warehouse', 'In the Warehouse'),
-        ('sold', 'Sold'),
-    ]
-
-    breed = models.ForeignKey(InventoryBreed, on_delete=models.CASCADE)
-    part_name = models.CharField(max_length=255, choices=InventoryBreedSales.PART_CHOICES)
-    sale_type = models.CharField(max_length=255, choices=InventoryBreedSales.SALE_CHOICES)
-    quantity = models.PositiveIntegerField()
-    quantity_left = models.PositiveIntegerField(default=0, editable=False)  # Set editable=False to make it read-only in admin
-    sale_date = models.DateField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_warehouse')
-
-    def __str__(self):
-        return f"{self.breed} - {self.get_part_name_display()} - {self.get_sale_type_display()} - Status: {self.get_status_display()}"
-
-    def save(self, *args, **kwargs):
-        if self.status == 'sold':
-            # Calculate quantity_left based on the total quantity sold
-            total_quantity_sold = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, sale_type=self.sale_type, status='sold').aggregate(Sum('quantity'))['quantity__sum'] or 0
-            self.quantity_left = max(self.quantity - total_quantity_sold, 0)
-
-        super().save(*args, **kwargs)
-
-    def quantity_sold(self):
-        # Helper method to get the total quantity sold
-        return BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, sale_type=self.sale_type, status='sold').aggregate(Sum('quantity'))['quantity__sum'] or 0
+        return f"{self.breed.status} - {self.get_part_name_display()} - {self.get_sale_type_display()}"
 
 
 @receiver(pre_save, sender=InventoryBreed)
@@ -143,10 +145,10 @@ def update_sale_quantity(sender, instance, **kwargs):
 @receiver(post_save, sender=BreaderTrade)
 def update_inventory_breed_quantity(sender, instance, created, **kwargs):
     if created:
-        breed_name = instance.breed_name
+        breed = instance.breed
         try:
             # Use filter instead of get to handle multiple instances
-            inventory_breeds = InventoryBreed.objects.filter(breed_name=breed_name)
+            inventory_breeds = BreedCut.objects.filter(sales__part_name=part_name)
             
             if inventory_breeds.exists():
                 # Assuming you want to update the first instance
@@ -157,7 +159,7 @@ def update_inventory_breed_quantity(sender, instance, created, **kwargs):
             else:
                 # Create a new InventoryBreed entry if it doesn't exist
                 InventoryBreed.objects.create(
-                    breed_name=breed_name,
+                    breed=breed,
                     quantity=instance.breads_supplied,
                     status='in_yard'  # Set the status here if needed
                 )

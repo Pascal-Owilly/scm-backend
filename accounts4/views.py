@@ -99,7 +99,6 @@ class RegistrationViewSet(AllAuthSignupView, viewsets.ViewSet):
             profile = Profile.objects.create(**profile_data)
         return response
 
-
 #  User role 
 
 class GetUserRole(APIView):

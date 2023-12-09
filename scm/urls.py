@@ -13,6 +13,8 @@ from inventory_management.views import InventoryBreedViewSet, InventoryBreedSale
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
+from inventory_management.views import total_breeds_supplied
+
 from dj_rest_auth.registration.views import (
     ResendEmailVerificationView,
     VerifyEmailView,
@@ -51,7 +53,7 @@ router.register(r'inventory-breed-sales', InventoryBreedSalesViewSet)
 router.register(r'abattoirs', AbattoirViewSet)
 router.register(r'breaders', BreaderViewSet)
 router.register(r'breed-cut', BreedCutViewSet)
-router.register(r'breed-part-count', SlaughterhouseRecordViewSet)
+# router.register(r'breed-part-count', SlaughterhouseRecordViewSet)
 router.register(r'breader-trade', BreaderTradeViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
@@ -73,6 +75,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
     path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
+    path('api/total_breeds_supplied/', total_breeds_supplied, name='total_breeds_supplied'),
+
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
     path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views

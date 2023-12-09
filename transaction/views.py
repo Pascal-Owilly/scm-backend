@@ -6,6 +6,9 @@ import logging
 from rest_framework.decorators import action
 from django.http import JsonResponse
 from rest_framework.views import APIView
+from django.db.models import Sum
+
+
 
 
 class AbattoirViewSet(viewsets.ModelViewSet):
@@ -19,6 +22,7 @@ class BreaderViewSet(viewsets.ModelViewSet):
 logger = logging.getLogger(__name__)
 
 class BreaderTradeViewSet(viewsets.ModelViewSet):
+
     queryset = BreaderTrade.objects.all().order_by('-transaction_date')
     serializer_class = BreaderTradeSerializer
 
@@ -36,6 +40,7 @@ class BreaderTradeViewSet(viewsets.ModelViewSet):
             print(f"Error in creating BreaderTrade: {str(e)}")
             # Return a response indicating the error
             return Response({"error": "An error occurred while creating BreaderTrade."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
     @action(detail=True, methods=['get'])
     def breader_info(self, request, pk=None):
         """
@@ -54,6 +59,12 @@ class BreaderTradeViewSet(viewsets.ModelViewSet):
             print(f"Error in retrieving Breader information: {str(e)}")
             # Return a response indicating the error
             return Response({"error": "An error occurred while retrieving Breader information."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def total_quantity(self, request):
+        total_quantity_by_breed = BreaderTrade.objects.values('breed').annotate(total_quantity=Sum('breads_supplied'))
+        return Response({'total_quantity_by_breed': total_quantity_by_breed})
+        print(total_quantity_by_breed)
 
 class BreaderCountView(APIView):
     def get(self, request, format=None):

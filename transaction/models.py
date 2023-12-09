@@ -3,8 +3,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
 from phonenumber_field.modelfields import PhoneNumberField
-from django.db.models.signals import post_save
-from django.dispatch import receiver
 
 class Abattoir(models.Model):
     name = models.CharField(max_length=100)
@@ -46,12 +44,17 @@ class BreaderTrade(models.Model):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
         return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
 
-@receiver(post_save, sender=BreaderTrade)
-def update_breads_supplied(sender, instance, created, **kwargs):
-    if created:  # Only update if the instance is newly created
-        # Assuming you have a related field in Breader model named 'total_breads_supplied'
-        instance.breader.total_breads_supplied += instance.breads_supplied
-        instance.breader.save()
+# @receiver(post_save, sender=BreaderTrade)
+# def update_breads_supplied(sender, instance, **kwargs):
+#     # Update breeds_supplied field after saving
+#     aggregated_sum = BreaderTrade.objects.filter(breader=instance.breader).aggregate(models.Sum('breads_supplied'))['breads_supplied__sum']
+#     print(f"Aggregated sum for {instance.breader}: {aggregated_sum}")
+#     instance.breads_supplied = aggregated_sum if aggregated_sum is not None else 0
+#     instance.save()
+
+# # Connect the signal
+# post_save.connect(update_breads_supplied, sender=BreaderTrade)
+
 
 class AbattoirPaymentToBreader(models.Model):
     breader_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)

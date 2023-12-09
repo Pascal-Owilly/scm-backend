@@ -27,6 +27,6 @@ STATUS_CHOICES = [
 ]
 
 SALE_CHOICES = [
-    ('sold', 'Sold'),
-    ('in_warehouse', 'In the warehouse'),
+    ('export_cut', 'Export Cut'),
+    ('local_sale', 'Local Sale Cut'),
 ]

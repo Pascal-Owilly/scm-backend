@@ -9,7 +9,7 @@ from django.dispatch import receiver
 class SlaughterhouseRecord(models.Model):
     breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
     slaughter_date = models.DateField(auto_now_add=True)
-    part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
+    # part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

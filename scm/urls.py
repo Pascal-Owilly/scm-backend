@@ -57,7 +57,7 @@ router.register(r'breeder_totals', BreederTotalViewSet, basename='breeder_totals
 router.register(r'abattoirs', AbattoirViewSet)
 router.register(r'breaders', BreaderViewSet)
 router.register(r'breed-cut', BreedCutViewSet)
-# router.register(r'breed-part-count', SlaughterhouseRecordViewSet)
+router.register(r'breed-part-count', SlaughterhouseRecordViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
 

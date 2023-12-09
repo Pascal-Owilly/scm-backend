@@ -2,10 +2,12 @@
 
 from rest_framework import viewsets
 from .models import InventoryBreed, InventoryBreedSales, BreedCut
-from .serializers import InventoryBreedSerializer, InventoryBreedSalesSerializer, BreedCutSerializer
+from .serializers import InventoryBreedSerializer, InventoryBreedSalesSerializer, BreedCutSerializer, BreederTotalSerializer
 from transaction.models import BreaderTrade
 from django.db.models import Sum
 from django.http import JsonResponse
+from rest_framework.response import Response
+
 
 class InventoryBreedViewSet(viewsets.ModelViewSet):
     queryset = InventoryBreed.objects.all()
@@ -22,15 +24,15 @@ class InventoryBreedSalesViewSet(viewsets.ModelViewSet):
 
 
 
-def total_breeds_supplied(request):
-    breeder_totals = BreaderTrade.objects.values('breader__id', 'breed').annotate(total_breed_supply=Sum('breads_supplied'))
+class BreederTotalViewSet(viewsets.ViewSet):
 
-    result = []
-    for breeder_total in breeder_totals:
-        result.append({
-            'breeder_id': breeder_total['breader__id'],
-            'breed': breeder_total['breed'],
-            'total_breed_supply': breeder_total['total_breed_supply'],
-        })
+    def list(self, request):
+        breeder_totals = (
+            BreaderTrade.objects
+            .values('breader__id', 'breed')
+            .annotate(total_breed_supply=Sum('breads_supplied'))
+        )
 
-    return JsonResponse(result, safe=False)
+        serializer = BreederTotalSerializer(breeder_totals, many=True)
+
+        return Response(serializer.data)

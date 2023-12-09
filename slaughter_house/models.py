@@ -7,17 +7,22 @@ from django.dispatch import receiver
 # from transaction.models import BreaderTrade
 
 class SlaughterhouseRecord(models.Model):
+
+    SLAUGHTER_STATUS_CHOICES = [
+            ('slaughtered', 'Slaughtered'),
+    ]
+
     breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
     slaughter_date = models.DateField(auto_now_add=True)
     # part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='slaughtered')
-    sale_choice = models.CharField(max_length=255, choices=SALE_CHOICES, default='export_cuts')
+    status = models.CharField(max_length=255, choices=SLAUGHTER_STATUS_CHOICES, default='slaughtered')
+    # sale_choice = models.CharField(max_length=255, choices=SALE_CHOICES, default='export_cuts')
 
     def __str__(self):
-        return f"Slaughterhouse Record - Date: {self.slaughter_date}, Part: {self.get_part_name_display()}, Quantity: {self.quantity}"
+        return f"Slaughterhouse Record - Date: {self.slaughter_date}, Breed: {self.get_breed_display()}, Quantity: {self.quantity}"
 
 
     

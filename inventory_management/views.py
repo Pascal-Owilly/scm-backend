@@ -5,7 +5,8 @@ from .models import InventoryBreed, InventoryBreedSales, BreedCut
 from .serializers import InventoryBreedSerializer, InventoryBreedSalesSerializer, BreedCutSerializer, BreederTotalSerializer
 from transaction.models import BreaderTrade
 from slaughter_house.models import SlaughterhouseRecord
-from django.db.models import Sum, F
+from django.db.models import Sum, F, Case, When, Value
+from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from rest_framework.response import Response
 
@@ -28,31 +29,46 @@ class InventoryBreedSalesViewSet(viewsets.ModelViewSet):
 class BreederTotalViewSet(viewsets.ViewSet):
 
     def list(self, request):
+        # Calculate total breed supply from BreaderTrade
         breeder_totals = (
             BreaderTrade.objects
             .values('breader__id', 'breed')
             .annotate(total_breed_supply=Sum('breads_supplied'))
         )
 
-        # Deduct quantities for slaughtered records
+        # Calculate total slaughtered from SlaughterhouseRecord
         slaughtered_quantities = (
             SlaughterhouseRecord.objects
-            .filter(breed=F('breed'))
-            .filter(status='slaughtered')
             .values('breed')
             .annotate(total_slaughtered=Sum('quantity'))
         )
 
-        for breeder_total in breeder_totals:
-            breed = breeder_total['breed']
-            total_breed_supply = breeder_total['total_breed_supply']
+        # Combine both results into a dictionary for easy access
+        total_dict = {}
+        for total in breeder_totals:
+            breader_id = total['breader__id']
+            breed = total['breed']
+            total_dict.setdefault(breed, {'breader__id': breader_id, 'total_breed_supply': 0, 'breed': breed})
+            total_dict[breed]['total_breed_supply'] += total['total_breed_supply']
 
-            # Deduct slaughtered quantities if available
-            for slaughtered_quantity in slaughtered_quantities:
-                if slaughtered_quantity['breed'] == breed:
-                    total_breed_supply -= slaughtered_quantity['total_slaughtered']
+        for slaughtered_quantity in slaughtered_quantities:
+            breed = slaughtered_quantity['breed']
+            total_dict.setdefault(breed, {'breader__id': None, 'total_breed_supply': 0, 'breed': breed})
+            
+            # Check if breed exists in breeder_totals before subtracting
+            if breed in total_dict:
+                # Validate before subtracting
+                remaining_breed_supply = total_dict[breed]['total_breed_supply'] - slaughtered_quantity['total_slaughtered']
+                if remaining_breed_supply < 0:
+                    raise ValueError(f"Cannot slaughter {slaughtered_quantity['total_slaughtered']} of breed {breed}. Insufficient breed supply.")
+                total_dict[breed]['total_breed_supply'] = remaining_breed_supply
 
-            breeder_total['total_breed_supply'] = total_breed_supply
+        # Convert the dictionary values to a list
+        breeder_totals = list(total_dict.values())
+
+        # Ensure all entries have 'breed' key
+        for entry in breeder_totals:
+            entry['breed'] = entry.get('breed', None)
 
         serializer = BreederTotalSerializer(breeder_totals, many=True)
 

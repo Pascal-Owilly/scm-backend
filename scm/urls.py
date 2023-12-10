@@ -9,7 +9,7 @@ from rest_framework.routers import DefaultRouter
 from accounts.views import Profile, ProfileViewset
 from accounts import views
 from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet
-from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet
+from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
@@ -49,7 +49,8 @@ router.register(r'inventory-breed-name', InventoryBreedViewSet)
 
 # Ready -breed and trade
 router.register(r'breader-trade', BreaderTradeViewSet)
-router.register(r'breeder_totals', BreederTotalViewSet, basename='breeder_totals')
+router.register(r'breeder_totals', BreederTotalViewSet, basename='cut_totals')
+router.register(r'part_totals_count', BreedCutTotalViewSet, basename='breeder_totals')
 
 
 # Inventory management
@@ -57,7 +58,7 @@ router.register(r'breeder_totals', BreederTotalViewSet, basename='breeder_totals
 router.register(r'abattoirs', AbattoirViewSet)
 router.register(r'breaders', BreaderViewSet)
 router.register(r'breed-cut', BreedCutViewSet)
-router.register(r'total-breed-left', SlaughterhouseRecordViewSet)
+router.register(r'slaughtered-list', SlaughterhouseRecordViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
 

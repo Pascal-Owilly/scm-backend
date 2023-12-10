@@ -195,7 +195,7 @@ JWT_AUTH = {
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'scm',
+        'NAME': 'supply',
         'USER': 'pascal',
         'PASSWORD': 'test',
         'HOST': 'localhost',

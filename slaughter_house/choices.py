@@ -22,7 +22,7 @@ PART_CHOICES = [
 
 STATUS_CHOICES = [
         ('slaughtered', 'Slaughtered'),
-        ('in_the warehouse', 'In The Warehouse'),
+        ('in_the_warehouse', 'In The Warehouse'),
         ('sold', 'Sold'),
 ]
 

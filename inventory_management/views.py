@@ -2,13 +2,14 @@
 
 from rest_framework import viewsets
 from .models import InventoryBreed, InventoryBreedSales, BreedCut
-from .serializers import InventoryBreedSerializer, InventoryBreedSalesSerializer, BreedCutSerializer, BreederTotalSerializer
+from .serializers import InventoryBreedSerializer, InventoryBreedSalesSerializer, BreedCutSerializer, BreederTotalSerializer, BreedCutTotalSerializer
 from transaction.models import BreaderTrade
 from slaughter_house.models import SlaughterhouseRecord
 from django.db.models import Sum, F, Case, When, Value
 from django.db.models.functions import Coalesce
 from django.http import JsonResponse
 from rest_framework.response import Response
+from django.db.models import Count
 
 
 class InventoryBreedViewSet(viewsets.ModelViewSet):
@@ -19,12 +20,31 @@ class BreedCutViewSet(viewsets.ModelViewSet):
     queryset = BreedCut.objects.all()
     serializer_class = BreedCutSerializer
 
+class BreedCutTotalViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        # Calculate total breed cut for each part_name
+        breed_cut_totals = (
+            BreedCut.objects
+            .values('breed','part_name', 'quantity', 'sale_type', 'sale_date')
+            .annotate(total_breed_cut=Sum('quantity'))
+        )
+
+        # Convert the queryset to a list
+        cut_totals = list(breed_cut_totals)
+
+        # Ensure all entries have 'part_name' key
+        for entry in cut_totals:
+            entry['part_name'] = entry.get('part_name', None)
+
+        serializer = BreedCutTotalSerializer(cut_totals, many=True)
+
+        return Response(serializer.data)
+
 
 class InventoryBreedSalesViewSet(viewsets.ModelViewSet):
     queryset = InventoryBreedSales.objects.all()
     serializer_class = InventoryBreedSalesSerializer
-
-
 
 class BreederTotalViewSet(viewsets.ViewSet):
 

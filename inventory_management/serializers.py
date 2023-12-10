@@ -24,3 +24,11 @@ class BreederTotalSerializer(serializers.Serializer):
     breeder__id = serializers.IntegerField(source='breader__id')
     breed = serializers.CharField()
     total_breed_supply = serializers.IntegerField()
+
+class BreedCutTotalSerializer(serializers.Serializer):
+    part_name = serializers.CharField()
+    breed = serializers.CharField()
+    quantity = serializers.IntegerField()
+    sale_type = serializers.CharField()
+    sale_date = serializers.DateField()
+    total_breed_cut = serializers.IntegerField()

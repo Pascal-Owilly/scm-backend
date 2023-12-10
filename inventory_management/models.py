@@ -11,6 +11,8 @@ from .choices import BREED_CHOICES,PART_CHOICES, SALE_CHOICES, STATUS_CHOICES
 from transaction.models import BreaderTrade
 from django.db.models import Sum  # Import Sum here
 from slaughter_house.models import SlaughterhouseRecord
+from django.db import models, transaction
+from django.core.exceptions import ObjectDoesNotExist
 
 logger = logging.getLogger(__name__)
 
@@ -23,24 +25,12 @@ class BreedCut(models.Model):
     sale_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.get_breed_display()} - {self.get_part_name_display()} - {self.get_sale_type_display()}"
+        return f"{self.get_breed_display()} - {self.get_part_name_display()} - {self.get_sale_type_display()} - {self.quantity}"
 
-    def __str__(self):
-        return f"{self.get_breed_display()} - {self.get_part_name_display()} - {self.get_sale_type_display()}"
+    # def get_distinct_sales(self):
+    #     return self.sales.all().distinct()
 
-    def save(self, *args, **kwargs):
-        # Calculate total_quantity for the specific part, breed, and sale_type
-        total_quantity = BreedCut.objects.filter(breed=self.breed, part_name=self.part_name, sale_type=self.sale_type).aggregate(Sum('quantity'))['quantity__sum'] or 0
-
-        # Increment quantity_left by the new value
-        self.quantity_left += self.quantity
-
-        # Update quantity based on the calculated total_quantity and new value
-        self.quantity = total_quantity + self.quantity
-
-        super().save(*args, **kwargs)
-
-
+    
 class InventoryBreed(models.Model):
 
     breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
@@ -51,27 +41,10 @@ class InventoryBreed(models.Model):
 
 class InventoryBreedSales(models.Model):
     
-    PART_CHOICES = [
-    ('ribs', 'Ribs'),
-    ('thighs', 'Thighs'),
-    ('loin', 'Loin'),
-    ('shoulder', 'Shoulder'),
-    ('shanks', 'Shanks'),
-    ('organ_meat', 'Organ Meat'),
-    ('intestines', 'Intestines'),
-    ('tripe', 'Tripe'),
-    ('sweetbreads', 'Sweetbreads'),
-]
-
-    STATUS_CHOICES = [
-        ('in_the warehouse', 'In The Warehouse'),
-        ('slaughtered', 'Slaughtered'),
-        ('sold', 'Sold'),
-    ]
-
-    breed = models.ForeignKey(BreedCut, on_delete=models.CASCADE)
+    breed = models.ForeignKey(BreedCut, on_delete=models.CASCADE, related_name='sales')
     part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
     sale_type = models.CharField(max_length=255, choices=SALE_CHOICES)
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='in_the_warehouse')
     quantity = models.PositiveIntegerField()
     sale_date = models.DateField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -81,46 +54,22 @@ class InventoryBreedSales(models.Model):
     def __str__(self):
         return f"{self.breed.status} - {self.get_part_name_display()} - {self.get_sale_type_display()}"
 
-# @receiver(post_save, sender=InventoryBreedSales)
-# def record_breed_cuts(sender, instance, created, **kwargs):
-#         if created:
-#             breed_cut = BreedCut.objects.create(
-#                 breed=instance.breed,
-#                 part_name=instance.part_name,
-#                 sale_type=instance.sale_type,
-#                 quantity=instance.quantity,
-#                 sale_date=instance.sale_date
-#             )
-#             # Update the quantity_left for the associated BreedCut
-#             total_quantity_left = breed_cut.manually_add_quantity(0)  # Manually add 0, just to trigger the update
-#             print(f"Total Quantity Left: {total_quantity_left}")
+    def save(self, *args, **kwargs):
+        with transaction.atomic():
+            try:
+                breed_cut = BreedCut.objects.get(id=self.breed_id, part_name=self.part_name, sale_type=self.sale_type)
+                breed_cut.quantity -= self.quantity
+                breed_cut.save()
+                # Update status based on whether the quantity has been deducted
+                self.status = 'sold'
+            except ObjectDoesNotExist:
+                logger.warning(f"BreedCut not found for id={self.breed_id}, part_name={self.part_name}, sale_type={self.sale_type}")
+                # Handle the case where the corresponding BreedCut is not found
+                # Assuming that status should be 'in_the_warehouse' if not sold
+                self.status = 'in_the_warehouse'
 
+        super().save(*args, **kwargs)
 
-# @receiver(post_save, sender=BreaderTrade)
-# def update_breads_supplied_quantity(sender, instance, created, **kwargs):
-#     if created:
-#         breed = instance.breed
-#         try:
-#             # Use filter instead of get to handle multiple instances
-#             breads_supplied = BreedCut.objects.filter(breed=breed)
-            
-#             if breads_supplied.exists():
-#                 # Assuming you want to update the first instance
-#                 breads_supplied = breads_supplied.first()
-#                 total_quantity_left = breads_supplied.manually_add_quantity(instance.breads_supplied)
-#                 print(f"Total Quantity Left: {total_quantity_left}")
-#             else:
-#                 # Create a new BreedCut entry if it doesn't exist
-#                 breed_cut = BreedCut.objects.create(
-#                     breed=breed,
-#                     part_name='default',  # Set the appropriate default part_name
-#                     sale_type='default',  # Set the appropriate default sale_type
-#                     quantity=instance.breads_supplied,
-#                     sale_date=timezone.now()  # Set the appropriate sale_date
-#                 )
-#                 # Manually add the specified quantity
-#                 total_quantity_left = breed_cut.manually_add_quantity(0)  # Manually add 0, just to trigger the update
-#                 print(f"Total Quantity Left: {total_quantity_left}")
-
-#         except ObjectDoesNotExist:
-#             pass
+class Meta:
+    
+    unique_together = ['breed', 'part_name', 'sale_type', 'sale_date']

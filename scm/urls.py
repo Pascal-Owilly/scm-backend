@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 from accounts.views import Profile, ProfileViewset
 from accounts import views
-from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet
+from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView
 from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
@@ -78,7 +78,7 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
-    # path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
+    path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
     # path('api/total_breeds_supplied/', total_breeds_supplied, name='total_breeds_supplied'),
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),

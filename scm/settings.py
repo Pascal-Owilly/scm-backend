@@ -80,6 +80,7 @@ INSTALLED_APPS = [
     'slaughter_house.apps.SlaughterHouseConfig',
     'mpesa_payments.apps.MpesaPaymentsConfig',
     'custom_registration.apps.CustomRegistrationConfig',
+    'invoice_generator.apps.InvoiceGeneratorConfig',
 
         # 3rd party
 

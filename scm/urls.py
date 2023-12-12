@@ -13,6 +13,8 @@ from inventory_management.views import InventoryBreedViewSet, InventoryBreedSale
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
+from invoice_generator.views import GenerateInvoiceView
+from slaughter_house.views import supply_vs_demand_statistics
 
 from dj_rest_auth.registration.views import (
     ResendEmailVerificationView,
@@ -80,6 +82,9 @@ urlpatterns = [
     path('api/', include(router.urls)),
     path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
     # path('api/total_breeds_supplied/', total_breeds_supplied, name='total_breeds_supplied'),
+    path('generate-invoice/', GenerateInvoiceView.as_view(), name='generate_invoice'),
+    path('api/supply-vs-demand/', supply_vs_demand_statistics, name='supply_vs_demand_statistics'),
+
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),

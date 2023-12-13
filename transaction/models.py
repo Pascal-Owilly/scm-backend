@@ -2,6 +2,7 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser, Group, Permission
 from phonenumber_field.modelfields import PhoneNumberField
 
 class Abattoir(models.Model):
@@ -10,11 +11,19 @@ class Abattoir(models.Model):
     def __str__(self):
         return self.name
 
-class Breader(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class Breader(AbstractUser):
+    
+    name = models.CharField(unique=True, max_length=100, default='')
+    email = models.EmailField(unique=True, default='')
+    market = models.CharField(max_length=255, default='')
+    community = models.CharField(max_length=255, default='')
+    head_of_family = models.CharField(max_length=255, default='')
+    groups = models.ManyToManyField(Group, related_name='breeder_groups')
+    user_permissions = models.ManyToManyField(Permission, related_name='breeder_permissions')
     
     def __str__(self):
-        return self.user.username
+
+        return self.username
 
 class BreaderTrade(models.Model):
 

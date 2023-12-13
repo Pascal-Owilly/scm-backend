@@ -127,6 +127,7 @@ SWAGGER_SETTINGS = {
 
 SIGNALS_MODULE = 'accounts.signals'
 AUTH_USER_MODEL = 'auth.User'
+
 ROOT_URLCONF = 'scm.urls'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 

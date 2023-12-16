@@ -8,7 +8,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
-"""
+# """
 
 from pathlib import Path
 import os
@@ -48,9 +48,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-$d8&01e=mjlo33y+47z0fm^1(0rj@l&s5lyus!97mbuufp%r#%'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'http://localhost:5173']
+ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGINS = [
@@ -74,7 +75,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'accounts.apps.AccountsConfig',
+    # 'accounts.apps.AccountsConfig',
     'inventory_management.apps.InventoryManagementConfig',
     'transaction.apps.TransactionConfig',
     'slaughter_house.apps.SlaughterHouseConfig',
@@ -120,13 +121,14 @@ MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
 
 
 
-SWAGGER_SETTINGS = {
-    'LOGIN_URL': 'rest_framework:login',
-    'LOGOUT_URL': 'rest_framework:logout',
-}
+# SWAGGER_SETTINGS = {
+#     'LOGIN_URL': 'rest_framework:login',
+#     'LOGOUT_URL': 'rest_framework:logout',
+# }
 
-SIGNALS_MODULE = 'accounts.signals'
-AUTH_USER_MODEL = 'auth.User'
+# SIGNALS_MODULE = 'custom_registration.signals'
+
+AUTH_USER_MODEL = 'custom_registration.CustomUser'
 
 ROOT_URLCONF = 'scm.urls'
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
@@ -178,18 +180,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'scm.wsgi.application'
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-    'rest_framework.permissions.IsAuthenticated',
-    ],
-        'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication', # new
-        ],
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    # ...
 }
 
-JWT_AUTH = {
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
-}
+# REST_FRAMEWORK = {
+#     'DEFAULT_PERMISSION_CLASSES': [
+#     'rest_framework.permissions.IsAuthenticated',
+#     ],
+#         'DEFAULT_AUTHENTICATION_CLASSES': [
+#         'rest_framework.authentication.SessionAuthentication',
+#         'rest_framework.authentication.TokenAuthentication', # new
+#         ],
+# }
+
+# JWT_AUTH = {
+#     'JWT_EXPIRATION_DELTA': datetime.timedelta(days=1),
+# }
+
+# AUTH_USER_MODEL = 'custom_registration.CustomUser'
 
 
 # Database

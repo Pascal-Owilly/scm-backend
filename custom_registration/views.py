@@ -1,67 +1,161 @@
-# views.py
-from allauth.account.views import SignupView
-from allauth.account.forms import SignupForm
-from allauth.account.utils import complete_signup
+from rest_framework import viewsets, generics
 from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.permissions import IsAuthenticated
+
+from .models import CustomUser, UserProfile
 from rest_framework import status
-from rest_framework_jwt.settings import api_settings
-from django import forms  # Add this import
-from django.http import JsonResponse
-from django.middleware.csrf import get_token
 
-jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
+from django.contrib.auth.views import LogoutView
+from rest_framework_simplejwt.views import TokenRefreshView
 
-def get_csrf_token(request):
-    csrf_token = get_token(request)
-    return JsonResponse({'csrf_token': csrf_token})
+class GetUserRole(APIView):
+    def get(self, request):
+        if request.user.is_authenticated:
+            user_groups = request.user.groups.all()
+            user_roles = [group.name for group in user_groups]
 
-def register(self, request, **kwargs):
-        # Print X-CSRFToken header to terminal
-        csrf_token = request.META.get('HTTP_X_CSRFTOKEN')
-        print(f'X-CSRFToken: {csrf_token}')
+            # Assuming the user can have multiple roles, you may want to customize how you determine the primary role
+            primary_role = user_roles[0] if user_roles else "regular"
 
-        form = self.get_form()
-        if form.is_valid():
-            user = self.form_valid(form)
-            return self.create_response(request, user)
+            return Response({
+                "roles": user_roles,
+                "primary_role": primary_role,
+                "group_names": [group.name for group in user_groups],
+            })
         else:
-            return self.form_invalid(form)
+            return Response({"roles": ["anonymous"], "primary_role": "anonymous", "group_names": []}, status=status.HTTP_401_UNAUTHORIZED)
+
+class CustomTokenRefreshView(TokenRefreshView):
+    # Customize if needed
+    '''
+    this automatically refreshes the token
+    '''
+    pass
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    serializer_class = CustomTokenObtainPairSerializer  # Replace with your custom serializer
 
 
-class CustomSignupForm(SignupForm):
-    first_name = forms.CharField(max_length=30, label='First Name')
-    last_name = forms.CharField(max_length=30, label='Last Name')
-    id_number = forms.CharField(max_length=20, label='ID Number')
-    community = forms.CharField(max_length=100, label='Community')
-    market = forms.CharField(max_length=100, label='Market')
+class CustomUserRegistrationViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+    serializer_class = CustomUserSerializer
 
-class CustomRegistrationView(SignupView):
-    form_class = CustomSignupForm
+    def create(self, request, *args, **kwargs):
+        from custom_registration.serializers import CustomUserSerializer  # Import here to break the circular import
 
-    def create_response(self, request, user):
-        payload = jwt_payload_handler(user)
-        token = jwt_encode_handler(payload)
+        serializer = self.serializer_class(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
 
-        return Response({'token': token})
+            # Refresh token after saving the user instance
+            refresh = RefreshToken.for_user(user)
 
-    def register(self, request, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            user = self.form_valid(form)
-            return self.create_response(request, user)
-        else:
-            return self.form_invalid(form)
+            tokens = {'refresh': str(refresh), 'access': str(refresh.access_token)}
+            return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=200)
+        return Response(serializer.errors, status=400)
 
-    def form_valid(self, form):
-        user = super().form_valid(form)
-        user.first_name = form.cleaned_data['first_name']
-        user.last_name = form.cleaned_data['last_name']
-        user.profile.community = form.cleaned_data['community']
-        user.profile.id_number = form.cleaned_data['id_number']
-        user.profile.market = form.cleaned_data['market']
-        user.save()
-        return user
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = UserProfile.objects.all()
+    serializer_class = UserProfileSerializer
 
-    def form_invalid(self, form):
-        return Response({'errors': form.errors}, status=status.HTTP_400_BAD_REQUEST)
+class UserProfileView(RetrieveUpdateAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+
+    def get_object(self):
+        # Retrieve the UserProfile instance associated with the authenticated user
+        return self.request.user.userprofile
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.serializer_class(instance)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.serializer_class(instance, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.serializer_class(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        instance.delete()
+        return Response({'detail': 'User profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+class CustomUserLoginViewSet(viewsets.ViewSet):
+    permission_classes = [AllowAny]
+
+    def create(self, request, *args, **kwargs):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+        # Validate username and password
+        if not username or not password:
+            return Response({'error': 'Both username and password are required.'}, status=400)
+
+        try:
+            # Authenticate the user
+            user = CustomUser.objects.get(username=username)
+        except CustomUser.DoesNotExist:
+            return Response({'error': 'Invalid credentials.'}, status=400)
+
+        # Check the password
+        if not user.check_password(password):
+            return Response({'error': 'Invalid credentials.'}, status=400)
+
+        # # If authentication is successful, generate tokens
+        # refresh = RefreshToken.for_user(user)
+        # tokens = {'refresh': str(refresh), 'access': str(refresh.access_token)}
+
+        # If authentication is successful, generate tokens
+        refresh = RefreshToken.for_user(user)
+        access = AccessToken.for_user(user)
+
+        tokens = {
+            'refresh': str(refresh),
+            'access': str(access),
+        }
+
+        user_data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'community': user.community,  
+            'country': user.country, 
+            'head_of_family':user.head_of_family,
+            'country': user.country,
+            'groups': user.groups,
+        }
+
+        return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=200)
+
+class CustomLogoutViewSet(viewsets.ViewSet):
+    def create(self, request, *args, **kwargs):
+        # Perform any additional actions you need before logging out
+        # For example, invalidate the user's token if you're using token-based authentication
+
+        # Logout the user
+        response = LogoutView.as_view()(request, *args, **kwargs)
+
+        # Return a JSON response using the LogoutSerializer
+        serializer = LogoutSerializer(data={'detail': 'Successfully logged out.'})
+        serializer.is_valid()
+        return Response(serializer.data, status=status.HTTP_200_OK)

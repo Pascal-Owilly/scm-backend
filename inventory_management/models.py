@@ -4,7 +4,7 @@ import logging
 from django.db import models
 from django.db.models.signals import post_save, pre_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
+from custom_registration.models import CustomUser
 from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from .choices import BREED_CHOICES,PART_CHOICES, SALE_CHOICES, STATUS_CHOICES
@@ -49,7 +49,7 @@ class InventoryBreedSales(models.Model):
     sale_date = models.DateField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    created_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
 
     def __str__(self):
         return f"{self.breed.status} - {self.get_part_name_display()} - {self.get_sale_type_display()}"

@@ -6,8 +6,8 @@ from drf_yasg import openapi
 from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
-from accounts.views import Profile, ProfileViewset
-from accounts import views
+# from accounts.views import Profile, ProfileViewset
+# from accounts import views
 from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView
 from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
@@ -32,17 +32,28 @@ from allauth.account.views import (
     PasswordResetDoneView as AllAuthPasswordResetDoneView,
 )
 
-from accounts.views import (
-    Profile,
-    ProfileViewset,
-    # email_confirm_redirect,
-    # password_reset_confirm_redirect,
-    GetUserRole,
+# from accounts.views import (
+#     Profile,
+#     ProfileViewset,
+#     # email_confirm_redirect,
+#     # password_reset_confirm_redirect,
+#     GetUserRole,
+# )
+
+from custom_registration.views import (
+    CustomTokenObtainPairView,
+    CustomUserLoginViewSet,
+    CustomUserRegistrationViewSet,
+    CustomLogoutViewSet,
+    CustomTokenRefreshView,
+    UserProfileView,
+    UserProfileViewSet,
+    GetUserRole
 )
 
 router = DefaultRouter()
 
-router.register(r'profile', ProfileViewset)
+# router.register(r'profile', ProfileViewset)
 
 # breed sales from transaction
 router.register(r'inventory-breed-sales', InventoryBreedSalesViewSet)
@@ -64,6 +75,14 @@ router.register(r'slaughtered-list', SlaughterhouseRecordViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
 
+# custom registration
+
+router.register(r'login', CustomUserLoginViewSet, basename='login')
+router.register(r'register', CustomUserRegistrationViewSet, basename='register')
+router.register(r'logout', CustomLogoutViewSet, basename='logout')
+router.register(r'profiles', UserProfileViewSet, basename='profile')
+
+
 # Invoice
 # Create a router and register our viewsets with it.
 router.register(r'generate-invoice', InvoiceViewSet)
@@ -84,6 +103,15 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # custom registration
+
+    path('auth/token/', CustomTokenObtainPairView.as_view(), name='auth-token'),
+    path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/user/', UserProfileView.as_view(), name='user-profile'),  # Use .as_view() for class-based views
+    path('get-user-role/', GetUserRole.as_view(), name='get_user_role'),
+
+
     path('api/', include(router.urls)),
     path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
     # path('api/total_breeds_supplied/', total_breeds_supplied, name='total_breeds_supplied'),
@@ -94,8 +122,8 @@ urlpatterns = [
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
     path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
-    path('auth/', include('accounts.urls')),
-    path('registration/', include('custom_registration.urls')),
+    # path('auth/', include('accounts.urls')),
+    # path('registration/', include('custom_registration.urls')),
     path('drf/', include('rest_framework.urls', namespace='rest_framework')),
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),

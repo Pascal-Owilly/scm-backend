@@ -54,6 +54,7 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 CORS_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_TRUSTED_ORIGINS = ['http://localhost:5173']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Add your React frontend's origin
     "http://127.0.0.1:5173",  # Add your React frontend's origin

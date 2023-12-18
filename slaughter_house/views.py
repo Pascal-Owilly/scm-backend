@@ -14,7 +14,7 @@ class SlaughterhouseRecordViewSet(viewsets.ModelViewSet):
 
 def supply_vs_demand_statistics(request):
     # Get total bred quantities per breed
-    bred_quantities = BreaderTrade.objects.values('breed').annotate(total_bred=Sum('breads_supplied'))
+    bred_quantities = BreaderTrade.objects.values('breed').annotate(total_bred=Sum('breeds_supplied'))
 
     # Get total slaughtered quantities per breed
     slaughtered_quantities = SlaughterhouseRecord.objects.values('breed').annotate(total_slaughtered=Sum('quantity'))

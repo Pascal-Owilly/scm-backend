@@ -3,6 +3,33 @@ from django.contrib.auth.models import AbstractUser, Group
 from django.db import models
 
 class CustomUser(AbstractUser):
+    NO_ROLE = 'no_role'
+    ABATTOIR = 'abattoir'
+    SUPERUSER = 'superuser'
+    BREEDER = 'breeder'
+    REGULAR = 'regular'
+    BUYER = 'buyer'
+    WAREHOUSE_PERSONNEL = 'warehouse_personnel'
+    INVENTORY_MANAGER = 'inventory_manager'
+    ADMIN = 'admin'
+    SLAUGHTERHOUSE_MANAGER = 'slaughterhouse_manager'
+    WAREHOUSE_MANAGER = 'warehouse_manager'
+
+    ROLE_CHOICES = [
+        (NO_ROLE, 'No Role'),
+        (ABATTOIR, 'Abattoir'),
+        (SUPERUSER, 'Superuser'),
+        (BREEDER, 'Breeder'),
+        (REGULAR, 'regular'),
+        (BUYER, 'Buyer'),
+        (WAREHOUSE_PERSONNEL, 'Warehouse Personnel'),
+        (INVENTORY_MANAGER, 'Inventory Manager'),
+        (ADMIN, 'Admin'),
+        (SLAUGHTERHOUSE_MANAGER, 'Slaughterhouse Manager'),
+        (WAREHOUSE_MANAGER, 'Warehouse Manager'),
+    ]
+
+    role = models.CharField(max_length=255, choices=ROLE_CHOICES, default=NO_ROLE)  # Default role can be changed
 
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
@@ -11,7 +38,7 @@ class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     market = models.CharField(max_length=100)
     community = models.CharField(max_length=100)
-    head_of_family = models.BooleanField(default=False)
+    head_of_family = models.CharField(max_length=255,default='Example Name')
     country = models.CharField(max_length=50)
     groups = models.ManyToManyField(Group, related_name='users', blank=True)
 
@@ -24,3 +51,5 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return self.user.username + ' Profile'
+
+

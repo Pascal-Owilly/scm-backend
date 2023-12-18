@@ -73,3 +73,4 @@ class InventoryBreedSales(models.Model):
 class Meta:
     
     unique_together = ['breed', 'part_name', 'sale_type', 'sale_date']
+

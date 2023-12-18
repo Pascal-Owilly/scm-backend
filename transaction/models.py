@@ -1,29 +1,25 @@
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User
-from django.contrib.auth.models import AbstractUser, Group, Permission
 from phonenumber_field.modelfields import PhoneNumberField
+from custom_registration.models import CustomUser
 
 class Abattoir(models.Model):
-    name = models.CharField(max_length=100)
 
-    def __str__(self):
-        return self.name
-
-class Breader(AbstractUser):
-    
-    name = models.CharField(unique=True, max_length=100, default='')
-    email = models.EmailField(unique=True, default='')
-    market = models.CharField(max_length=255, default='')
-    community = models.CharField(max_length=255, default='')
-    head_of_family = models.CharField(max_length=255, default='')
-    groups = models.ManyToManyField(Group, related_name='breeder_groups')
-    user_permissions = models.ManyToManyField(Permission, related_name='breeder_permissions')
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
     
     def __str__(self):
 
-        return self.username
+        return self.user.username
+
+class Breader(models.Model):
+
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+
+    def __str__(self):
+
+        return self.user.username
+
 
 class BreaderTrade(models.Model):
 
@@ -35,15 +31,12 @@ class BreaderTrade(models.Model):
         # Add more choices as needed
     ]
 
-    breader = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    breeder = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=1)
     abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
     transaction_date = models.DateTimeField(auto_now_add=True)
     breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
-    breads_supplied = models.PositiveIntegerField(default=0)
+    breeds_supplied = models.PositiveIntegerField(default=0)
     goat_weight = models.PositiveIntegerField(default=0)
-    community = models.CharField(max_length=255, default='Example ABC Community')
-    market = models.CharField(max_length=255, default='ABC Market')
-    head_of_family = models.CharField(max_length=255, default='Example ABC Family')
     vaccinated = models.BooleanField(default=False)
     # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
@@ -51,7 +44,7 @@ class BreaderTrade(models.Model):
     
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
-        return f"{self.market} from {self.community} supplied {self.breads_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
+        return f"{self.breeder.market} from {self.breeder.community} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
 
 # @receiver(post_save, sender=BreaderTrade)
 # def update_breads_supplied(sender, instance, **kwargs):
@@ -71,4 +64,4 @@ class AbattoirPaymentToBreader(models.Model):
     payment_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Payment of {self.amount} to {self.breader_trade.breader} for {self.breader_trade}"
+        return f"Payment of {self.amount} to {self.breader_trade.breeder} for {self.breader_trade}"

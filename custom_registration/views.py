@@ -17,19 +17,12 @@ from rest_framework_simplejwt.views import TokenRefreshView
 class GetUserRole(APIView):
     def get(self, request):
         if request.user.is_authenticated:
-            user_groups = request.user.groups.all()
-            user_roles = [group.name for group in user_groups]
-
-            # Assuming the user can have multiple roles, you may want to customize how you determine the primary role
-            primary_role = user_roles[0] if user_roles else "regular"
-
-            return Response({
-                "roles": user_roles,
-                "primary_role": primary_role,
-                "group_names": [group.name for group in user_groups],
-            })
+            # Get the user's role from the CustomUser model
+            user_role = request.user.role
+            return Response({"role": user_role})
         else:
-            return Response({"roles": ["anonymous"], "primary_role": "anonymous", "group_names": []}, status=status.HTTP_401_UNAUTHORIZED)
+            return Response({"role": "anonymous"}, status=status.HTTP_401_UNAUTHORIZED)
+
 
 class CustomTokenRefreshView(TokenRefreshView):
     # Customize if needed
@@ -52,6 +45,11 @@ class CustomUserRegistrationViewSet(viewsets.ViewSet):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
+
+            # Assign a role to the user, replace 'default_role' with your logic
+            user.role = 'No role'  # Replace with your logic for assigning roles
+            user.save()
+
 
             # Refresh token after saving the user instance
             refresh = RefreshToken.for_user(user)
@@ -99,6 +97,7 @@ class UserProfileView(RetrieveUpdateAPIView):
         return Response({'detail': 'User profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
 class CustomUserLoginViewSet(viewsets.ViewSet):
+
     permission_classes = [AllowAny]
 
     def create(self, request, *args, **kwargs):
@@ -120,9 +119,7 @@ class CustomUserLoginViewSet(viewsets.ViewSet):
             return Response({'error': 'Invalid credentials.'}, status=400)
 
         # # If authentication is successful, generate tokens
-        # refresh = RefreshToken.for_user(user)
-        # tokens = {'refresh': str(refresh), 'access': str(refresh.access_token)}
-
+        
         # If authentication is successful, generate tokens
         refresh = RefreshToken.for_user(user)
         access = AccessToken.for_user(user)
@@ -143,6 +140,7 @@ class CustomUserLoginViewSet(viewsets.ViewSet):
             'head_of_family':user.head_of_family,
             'country': user.country,
             'groups': user.groups,
+            'role': user.role,  
         }
 
         return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=200)

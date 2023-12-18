@@ -21,7 +21,7 @@ class BreedCutSerializer(serializers.ModelSerializer):
 # Breed count
 
 class BreederTotalSerializer(serializers.Serializer):
-    breeder__id = serializers.IntegerField(source='breader__id')
+    breader__id = serializers.IntegerField(source='breeder__id')
     breed = serializers.CharField()
     total_breed_supply = serializers.IntegerField()
 

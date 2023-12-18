@@ -52,8 +52,8 @@ class BreederTotalViewSet(viewsets.ViewSet):
         # Calculate total breed supply from BreaderTrade
         breeder_totals = (
             BreaderTrade.objects
-            .values('breader__id', 'breed')
-            .annotate(total_breed_supply=Sum('breads_supplied'))
+            .values('breeder__id', 'breed')
+            .annotate(total_breed_supply=Sum('breeds_supplied'))
         )
 
         # Calculate total slaughtered from SlaughterhouseRecord
@@ -66,14 +66,14 @@ class BreederTotalViewSet(viewsets.ViewSet):
         # Combine both results into a dictionary for easy access
         total_dict = {}
         for total in breeder_totals:
-            breader_id = total['breader__id']
+            breeder_id = total['breeder__id']
             breed = total['breed']
-            total_dict.setdefault(breed, {'breader__id': breader_id, 'total_breed_supply': 0, 'breed': breed})
+            total_dict.setdefault(breed, {'breeder__id': breeder_id, 'total_breed_supply': 0, 'breed': breed})
             total_dict[breed]['total_breed_supply'] += total['total_breed_supply']
 
         for slaughtered_quantity in slaughtered_quantities:
             breed = slaughtered_quantity['breed']
-            total_dict.setdefault(breed, {'breader__id': None, 'total_breed_supply': 0, 'breed': breed})
+            total_dict.setdefault(breed, {'breeder__id': None, 'total_breed_supply': 0, 'breed': breed})
             
             # Check if breed exists in breeder_totals before subtracting
             if breed in total_dict:

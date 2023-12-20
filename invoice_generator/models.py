@@ -3,12 +3,13 @@ from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOIC
 from custom_registration.models import CustomUser
 
 class Buyer(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    username = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
-        return f'{self.user}'
+        return f'{self.username}'
 
 class Invoice(models.Model):
+
     MEAT_CHOICES = [
         ('chevon', 'Chevon (Goat Meat)'),
         ('mutton', 'Mutton'),
@@ -16,10 +17,17 @@ class Invoice(models.Model):
         ('pork', 'Pork'),
     ]
     PART_CHOICES = [
-        ('ribs', 'Ribs'),
-        ('loin', 'Loin'),
-        # Add other part choices as needed
-    ]
+    ('ribs', 'Ribs'),
+    ('thighs', 'Thighs'),
+    ('loin', 'Loin'),
+    ('shoulder', 'Shoulder'),
+    ('shanks', 'Shanks'),
+    ('organ_meat', 'Organ Meat'),
+    ('intestines', 'Intestines'),
+    ('tripe', 'Tripe'),
+    ('sweetbreads', 'Sweetbreads'),
+]
+
     SALE_CHOICES = [
         ('export_cut', 'Export Cut'),
         ('local_cut', 'Local Cut'),
@@ -33,19 +41,7 @@ class Invoice(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     invoice_date = models.DateField(auto_now_add=True)
-    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
-    # bill_to = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='bill_to')
-    # ship_to = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='ship_to')
-    # due_date = models.DateField()
-
-    # Additional fields for UI-related data
-    # flash_message = models.TextField(blank=True, null=True)
-    # notifications = models.TextField(blank=True, null=True)
-    # purchase_issuance = models.BooleanField(default=False)
-    # banking_transactions = models.BooleanField(default=False)
-    # cataloging_live_deals = models.BooleanField(default=False)
-    # management_of_deals = models.BooleanField(default=False)
-    # tracking_financed_paid_off_deals = models.BooleanField(default=False)
-
+    buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    
     def __str__(self):
-        return f'Invoice for {self.breed} {self.part_name} of type {self.sale_type} - {self.quantity} for {self.buyer} generated on {self.invoice_date}'
+        return f'Invoice for {self.breed} {self.part_name} of type {self.sale_type} - {self.quantity} generated on {self.invoice_date}'

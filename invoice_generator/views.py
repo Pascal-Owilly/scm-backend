@@ -12,15 +12,44 @@ from .models import Invoice, Buyer
 from .serializers import InvoiceSerializer, BuyerSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from custom_registration.models import CustomUser
 
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all()
     serializer_class = InvoiceSerializer
 
     def perform_create(self, serializer):
-        # Calculate the total price before saving the object
-        serializer.validated_data['total_price'] = serializer.validated_data['quantity'] * serializer.validated_data['unit_price']
-        serializer.save()
+        try:
+            # Check if a buyer is associated with the invoice
+            buyer_data = serializer.validated_data.get('buyer', None)
+
+            if buyer_data:
+                # If a buyer is provided, create or retrieve the buyer
+                user, created = CustomUser.objects.get_or_create(**buyer_data)
+
+                # Update the serializer's buyer field with the CustomUser instance
+                serializer.validated_data['buyer'] = user
+
+            # Calculate the total price before saving the object
+            serializer.validated_data['total_price'] = (
+                serializer.validated_data['quantity'] * serializer.validated_data['unit_price']
+            )
+            serializer.save()
+        except Exception as e:
+            print(f"Error in perform_create: {e}")
+            raise
+        
+    # def perform_create(self, serializer):
+    #     try:
+    #         # Calculate the total price before saving the object
+    #         serializer.validated_data['total_price'] = serializer.validated_data['quantity'] * serializer.validated_data['unit_price']
+            
+    #         # Save the invoice without associating it with a specific buyer
+    #         serializer.save()
+    #     except Exception as e:
+    #         # Handle any exceptions that occur during the creation of the invoice
+    #         print(f"Exception occurred: {e}")
+    #         raise
 
     # @action(detail=True, methods=['get'])
     # def get_invoice_ui_data(self, request, pk=None):

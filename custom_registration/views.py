@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken, AccessToken
 from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import ListAPIView
 
 from .models import CustomUser, UserProfile
 from rest_framework import status
@@ -95,6 +96,18 @@ class UserProfileView(RetrieveUpdateAPIView):
         instance = self.get_object()
         instance.delete()
         return Response({'detail': 'User profile deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+# List all profiles
+
+class UserProfilesListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserProfileSerializer
+    queryset = UserProfile.objects.all()  # Assuming you have a UserProfile model
+
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        return Response(serializer.data)
 
 class CustomUserLoginViewSet(viewsets.ViewSet):
 

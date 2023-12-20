@@ -48,7 +48,8 @@ from custom_registration.views import (
     CustomTokenRefreshView,
     UserProfileView,
     UserProfileViewSet,
-    GetUserRole
+    GetUserRole,
+    UserProfilesListView
 )
 
 router = DefaultRouter()
@@ -64,7 +65,6 @@ router.register(r'inventory-breed-name', InventoryBreedViewSet)
 router.register(r'breader-trade', BreaderTradeViewSet)
 router.register(r'breeder_totals', BreederTotalViewSet, basename='cut_totals')
 router.register(r'part_totals_count', BreedCutTotalViewSet, basename='breeder_totals')
-
 
 # Inventory management
 
@@ -82,8 +82,8 @@ router.register(r'register', CustomUserRegistrationViewSet, basename='register')
 router.register(r'logout', CustomLogoutViewSet, basename='logout')
 router.register(r'profiles', UserProfileViewSet, basename='profile')
 
-
 # Invoice
+
 # Create a router and register our viewsets with it.
 router.register(r'generate-invoice', InvoiceViewSet)
 router.register(r'buyers', BuyerViewSet)
@@ -110,6 +110,7 @@ urlpatterns = [
     path('auth/token/refresh/', CustomTokenRefreshView.as_view(), name='token_refresh'),
     path('auth/user/', UserProfileView.as_view(), name='user-profile'),  # Use .as_view() for class-based views
     path('get-user-role/', GetUserRole.as_view(), name='get_user_role'),
+    path('auth/all-profiles/', UserProfilesListView.as_view(), name='get_user_role'),
 
 
     path('api/', include(router.urls)),

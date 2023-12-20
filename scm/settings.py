@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'mpesa_payments.apps.MpesaPaymentsConfig',
     'custom_registration.apps.CustomRegistrationConfig',
     'invoice_generator.apps.InvoiceGeneratorConfig',
+    'invoices',
 
         # 3rd party
 

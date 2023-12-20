@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import Invoice, Buyer
+from custom_registration.models import CustomUser  
 
 class BuyerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -7,23 +8,27 @@ class BuyerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    buyer = BuyerSerializer()
+    buyer = BuyerSerializer(required=False)
 
     class Meta:
         model = Invoice
         fields = '__all__'
 
-    # Add additional fields for UI-related data
-    # flash_message = serializers.CharField(allow_blank=True, required=False)
-    # notifications = serializers.CharField(allow_blank=True, required=False)
-    # purchase_issuance = serializers.BooleanField(required=False)
-    # banking_transactions = serializers.BooleanField(required=False)
-    # cataloging_live_deals = serializers.BooleanField(required=False)
-    # management_of_deals = serializers.BooleanField(required=False)
-    # tracking_financed_paid_off_deals = serializers.BooleanField(required=False)
+        def create(self, validated_data):
+            buyer_data = validated_data.pop('buyer', None)
 
-    # def create(self, validated_data):
-    #     buyer_data = validated_data.pop('buyer')
-    #     buyer_instance = Buyer.objects.create(**buyer_data)
-    #     validated_data['buyer'] = buyer_instance
-    #     return super().create(validated_data)
+            if buyer_data:
+                user_data = buyer_data.pop('user', None)
+
+                # Ensure the user data is provided
+                if user_data:
+                    user, created = CustomUser.objects.get_or_create(**user_data)
+
+                    # Additional fields can be set here if needed
+                    # user.field_name = user_data['field_name']
+                    # ...
+
+                    validated_data['buyer'] = user
+
+            return super().create(validated_data)
+

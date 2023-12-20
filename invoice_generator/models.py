@@ -44,4 +44,4 @@ class Invoice(models.Model):
     buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     
     def __str__(self):
-        return f'Invoice for {self.breed} {self.part_name} of type {self.sale_type} - {self.quantity} generated on {self.invoice_date}'
+        return f'Invoice for {self.breed} {self.part_name} of type {self.sale_type} - {self.quantity} pieces, generated and sent to {self.buyer} on {self.invoice_date}'

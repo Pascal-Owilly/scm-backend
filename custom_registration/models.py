@@ -5,6 +5,7 @@ from django.db import models
 class CustomUser(AbstractUser):
     NO_ROLE = 'no_role'
     ABATTOIR = 'abattoir'
+    EMPLOYEE= 'employee'
     SUPERUSER = 'superuser'
     BREEDER = 'breeder'
     REGULAR = 'regular'
@@ -18,6 +19,7 @@ class CustomUser(AbstractUser):
     ROLE_CHOICES = [
         (NO_ROLE, 'No Role'),
         (ABATTOIR, 'Abattoir'),
+        (EMPLOYEE, 'employee'),
         (SUPERUSER, 'Superuser'),
         (BREEDER, 'Breeder'),
         (REGULAR, 'regular'),

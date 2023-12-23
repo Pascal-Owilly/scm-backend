@@ -14,7 +14,7 @@ class CustomUser(AbstractUser):
     INVENTORY_MANAGER = 'inventory_manager'
     ADMIN = 'admin'
     SLAUGHTERHOUSE_MANAGER = 'slaughterhouse_manager'
-    WAREHOUSE_MANAGER = 'warehouse_manager'
+    # WAREHOUSE_MANAGER = 'warehouse_manager'
 
     ROLE_CHOICES = [
         (NO_ROLE, 'No Role'),
@@ -28,7 +28,7 @@ class CustomUser(AbstractUser):
         (INVENTORY_MANAGER, 'Inventory Manager'),
         (ADMIN, 'Admin'),
         (SLAUGHTERHOUSE_MANAGER, 'Slaughterhouse Manager'),
-        (WAREHOUSE_MANAGER, 'Warehouse Manager'),
+        # (WAREHOUSE_MANAGER, 'Warehouse Manager'),
     ]
 
     role = models.CharField(max_length=255, choices=ROLE_CHOICES, default=NO_ROLE)  # Default role can be changed

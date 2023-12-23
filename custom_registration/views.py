@@ -14,6 +14,7 @@ from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObta
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.views import LogoutView
 from rest_framework_simplejwt.views import TokenRefreshView
+from .serializers import RoleSerializer
 
 class GetUserRole(APIView):
     def get(self, request):
@@ -24,7 +25,25 @@ class GetUserRole(APIView):
         else:
             return Response({"role": "anonymous"}, status=status.HTTP_401_UNAUTHORIZED)
 
+class RoleListView(APIView):
+    def get(self, request, *args, **kwargs):
+        # Replace this with your logic to fetch roles from the database or any other source
+        roles = ['buyer', 'no_role', 'warehouse_personnel']
 
+        serializer = RoleSerializer(data={'roleChoices': roles})
+        serializer.is_valid(raise_exception=True)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        # Extract the role data from the request
+        role_data = request.data.get('roleChoices', {})
+
+        # Perform validation and update logic
+        # This is a placeholder, replace it with your actual logic to update roles in the database
+        # You may need to iterate through the roles and update the corresponding user's role in the database
+        updated_roles = role_data.get('roleChoices', [])
+        
 class CustomTokenRefreshView(TokenRefreshView):
     # Customize if needed
     '''
@@ -170,3 +189,4 @@ class CustomLogoutViewSet(viewsets.ViewSet):
         serializer = LogoutSerializer(data={'detail': 'Successfully logged out.'})
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
+

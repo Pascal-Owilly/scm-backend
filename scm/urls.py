@@ -49,7 +49,9 @@ from custom_registration.views import (
     UserProfileView,
     UserProfileViewSet,
     GetUserRole,
-    UserProfilesListView
+    UserProfilesListView,
+    RoleListView
+
 )
 
 router = DefaultRouter()
@@ -82,6 +84,7 @@ router.register(r'register', CustomUserRegistrationViewSet, basename='register')
 router.register(r'logout', CustomLogoutViewSet, basename='logout')
 router.register(r'profiles', UserProfileViewSet, basename='profile')
 
+
 # Invoice
 
 # Create a router and register our viewsets with it.
@@ -111,6 +114,7 @@ urlpatterns = [
     path('auth/user/', UserProfileView.as_view(), name='user-profile'),  # Use .as_view() for class-based views
     path('get-user-role/', GetUserRole.as_view(), name='get_user_role'),
     path('auth/all-profiles/', UserProfilesListView.as_view(), name='get_user_role'),
+    path('api/roles/', RoleListView.as_view(), name='role-list'),
 
 
     path('api/', include(router.urls)),

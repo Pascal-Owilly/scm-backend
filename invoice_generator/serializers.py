@@ -26,7 +26,6 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
                     # Additional fields can be set here if needed
                     # user.field_name = user_data['field_name']
-                    # ...
 
                     validated_data['buyer'] = user
 

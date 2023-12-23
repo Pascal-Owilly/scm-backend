@@ -3,6 +3,12 @@ from rest_framework import serializers
 from .models import CustomUser, UserProfile
 from rest_framework_simplejwt.tokens import RefreshToken
 
+class RoleSerializer(serializers.Serializer):
+    roleChoices = serializers.ListField()
+
+    def to_representation(self, instance):
+        return {'roleChoices': instance}
+         
 class CustomUserSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
 

@@ -14,8 +14,12 @@ from pathlib import Path
 import os
 import datetime
 from decouple import config, Csv
+from dotenv import load_dotenv
 
 # settings.py
+
+# Load environment variables from .env
+load_dotenv()
 
 LOGGING = {
     'version': 1,
@@ -84,6 +88,7 @@ INSTALLED_APPS = [
     'custom_registration.apps.CustomRegistrationConfig',
     'invoice_generator.apps.InvoiceGeneratorConfig',
     'invoices',
+    'payments',
 
         # 3rd party
 
@@ -103,6 +108,13 @@ INSTALLED_APPS = [
     'phonenumber_field',
 
 ]
+
+# EQUITY BANK CREDENTIALS
+# Read Jenga credentials from .env file
+JENGA_MERCHANT_CODE = config('JENGA_MERCHANT_CODE')
+JENGA_CONSUMER_SECRET = config('JENGA_CONSUMER_SECRET')
+JENGA_API_KEY = config('JENGA_API_KEY')
+# PRIVATE_KEY_PATH = config('PRIVATE_KEY_PATH', 'privatekey.pem')
 
 # MPESA CREDENTIALS
 consumer_key=config('consumer_key')

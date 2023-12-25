@@ -2,7 +2,7 @@ from django.db import models
 from transaction.models import BreaderTrade
 from django.utils import timezone
 
-class Payment(models.Model):
+class MpesaPayment(models.Model):
     payment_id = models.CharField(max_length=255)  # Add this field to store the PayPal payment ID
     status = models.CharField(max_length=50, default="pending")
 

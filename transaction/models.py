@@ -41,6 +41,8 @@ class BreaderTrade(models.Model):
     # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     phone_number = PhoneNumberField(null=True)
+    payment_status = models.CharField(max_length=20, default='pending')  # 'pending', 'completed', 'failed'
+
     
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')

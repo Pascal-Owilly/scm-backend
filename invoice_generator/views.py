@@ -16,7 +16,7 @@ from rest_framework.response import Response
 from custom_registration.models import CustomUser
 
 class InvoiceViewSet(viewsets.ModelViewSet):
-    queryset = Invoice.objects.all()
+    queryset = Invoice.objects.all().order_by('-invoice_date')
     serializer_class = InvoiceSerializer
     permission_classes = [IsAuthenticated]
 
@@ -24,7 +24,7 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         try:
             # Check if a buyer is associated with the invoice
             buyer_data = serializer.validated_data.get('buyer', None)
-
+    
             if buyer_data:
                 # If a buyer is provided, create or retrieve the buyer
                 user, created = CustomUser.objects.get_or_create(**buyer_data)

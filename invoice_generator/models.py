@@ -18,6 +18,7 @@ class Invoice(models.Model):
         ('beef', 'Beef'),
         ('pork', 'Pork'),
     ]
+
     PART_CHOICES = [
         ('ribs', 'Ribs'),
         ('thighs', 'Thighs'),
@@ -33,7 +34,6 @@ class Invoice(models.Model):
     SALE_CHOICES = [
         ('export_cut', 'Export Cut'),
         ('local_cut', 'Local Cut'),
-        # Add other sale choices as needed
     ]
 
     breed = models.CharField(max_length=255, choices=MEAT_CHOICES, default='chevon')
@@ -59,3 +59,4 @@ def pre_save_invoice(sender, instance, **kwargs):
         timestamp = instance.invoice_date.strftime('%Y%m%d%H%M%S') if instance.invoice_date else 'nodate'
         slug = f'INV-{timestamp}-{instance.breed}-{instance.part_name}-{instance.sale_type}-{instance.quantity}-{instance.buyer_id}'
         instance.invoice_number = slugify(slug)
+ 

@@ -51,13 +51,13 @@ from custom_registration.views import (
     GetUserRole,
     UserProfilesListView,
     RoleListView
-
 )
 
 # Payments
-from payments.views import request_payment, make_equity_bank_payment
+from payments.views import make_payment
 
 router = DefaultRouter()
+app_name = 'payments'
 
 # router.register(r'profile', ProfileViewset)
 
@@ -119,7 +119,6 @@ urlpatterns = [
     path('auth/all-profiles/', UserProfilesListView.as_view(), name='get_user_role'),
     path('api/roles/', RoleListView.as_view(), name='role-list'),
 
-
     path('api/', include(router.urls)),
     path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),
     # path('api/total_breeds_supplied/', total_breeds_supplied, name='total_breeds_supplied'),
@@ -127,10 +126,8 @@ urlpatterns = [
     path('api/supply-vs-demand/', supply_vs_demand_statistics, name='supply_vs_demand_statistics'),
 
     # Equity bank Payments
-    path('api/request-payment-equity/<int:breader_trade_id>/', request_payment, name='request_payment'),
-    path('api/make_equity_bank_payment/', make_equity_bank_payment, name='make_equity_bank_payment'),
-
-
+    # path('make_payment/<int:breeder_trade_id>/', make_payment, name='make_payment'),
+    path('api/make-payment/<int:breeder_trade_id>/', make_payment, name='make_epayment'),
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
@@ -141,6 +138,7 @@ urlpatterns = [
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+
 ]
 
 # Only add this when we are in debug mode.

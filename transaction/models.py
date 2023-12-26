@@ -3,11 +3,13 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
 from custom_registration.models import CustomUser
+from datetime import datetime
 
 class Abattoir(models.Model):
 
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    
+    account_number = models.CharField(max_length=30)
+
     def __str__(self):
 
         return self.user.username
@@ -43,6 +45,16 @@ class BreaderTrade(models.Model):
     phone_number = PhoneNumberField(null=True)
     payment_status = models.CharField(max_length=20, default='pending')  # 'pending', 'completed', 'failed'
     bank_account_number = models.CharField(max_length=30)
+    reference = models.CharField(max_length=30, unique=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        # Generate a unique reference when saving the object
+        if not self.reference:
+            # Use the current date and time if transaction_date is None
+            transaction_date = self.transaction_date or datetime.now()
+            self.reference = f"{transaction_date.strftime('%Y%m%d%H%M%S')}-{self.breeder.id}-{self.id}"
+
+        super().save(*args, **kwargs)
     
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%Y-%m-%d')

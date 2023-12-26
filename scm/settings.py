@@ -115,7 +115,7 @@ JENGA_MERCHANT_CODE = config('JENGA_MERCHANT_CODE')
 JENGA_CONSUMER_SECRET = config('JENGA_CONSUMER_SECRET')
 JENGA_API_KEY = config('JENGA_API_KEY')
 # PRIVATE_KEY_PATH = config('PRIVATE_KEY_PATH', 'privatekey.pem')
-
+CURRENCY_CODE = config('currencyCode')
 # MPESA CREDENTIALS
 consumer_key=config('consumer_key')
 consumer_secret=config('consumer_secret')

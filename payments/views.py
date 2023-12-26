@@ -14,10 +14,11 @@ from urllib.parse import urljoin
 import os
 logger = logging.getLogger(__name__)
 
-base_url = 'https://api.finserve.africa/'
-endpoint = 'authentication/api/v3/authenticate/merchant'
-full_url = urljoin(base_url, endpoint)
+# base_url = 'https://api.finserve.africa/'
+# endpoint = 'authentication/api/v3/authenticate/merchant'
+# full_url = urljoin(base_url, endpoint)
 # print('full url', full_url)
+# Function to generate the Bearer token
 # Function to generate the Bearer token
 def generate_bearer_token(api_key, merchant_code, consumer_secret):
     auth_url = "https://uat.finserve.africa/v3-apis/transaction-api/v3.0/remittance/internalBankTransfer"
@@ -33,15 +34,13 @@ def generate_bearer_token(api_key, merchant_code, consumer_secret):
     }
 
     response = requests.post(auth_url, headers=headers, data=json.dumps(data))
-    bearer_token = generate_bearer_token(api_key, merchant_code, consumer_secret)
-    print('bearer token', bearer_token)
+    
     if response.status_code == 200:
         bearer_token = response.json().get("accessToken")
-        # print('Access Token:', bearer_token)  # Print the access token
-
         return bearer_token
     else:
         return None
+
 
 # Function to generate the Jenga signature
 def generate_signature(breader_trade, private_key_path):
@@ -123,6 +122,7 @@ def make_equity_bank_payment(breader_trade, bearer_token, private_key_path):
         return JsonResponse({'message': f'Payment failed. Status code: {response.status_code}'}, status=response.status_code)
 
 # Function to request payment
+# Function to request payment
 def request_payment(request, breader_trade_id):
     breader_trade = get_object_or_404(BreaderTrade, pk=breader_trade_id)
 
@@ -137,6 +137,7 @@ def request_payment(request, breader_trade_id):
     bearer_token = generate_bearer_token(api_key, merchant_code, consumer_secret)
 
     if bearer_token:
+        # Pass the BreaderTrade object to the make_equity_bank_payment function
         make_equity_bank_payment(breader_trade, bearer_token, private_key_path)
         return JsonResponse({'message': 'Payment successful'})
     else:

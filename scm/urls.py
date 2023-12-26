@@ -55,7 +55,7 @@ from custom_registration.views import (
 )
 
 # Payments
-from payments.views import request_payment
+from payments.views import request_payment, make_equity_bank_payment
 
 router = DefaultRouter()
 
@@ -128,6 +128,7 @@ urlpatterns = [
 
     # Equity bank Payments
     path('api/request-payment-equity/<int:breader_trade_id>/', request_payment, name='request_payment'),
+    path('api/make_equity_bank_payment/', make_equity_bank_payment, name='make_equity_bank_payment'),
 
 
 

@@ -127,7 +127,7 @@ urlpatterns = [
     path('api/supply-vs-demand/', supply_vs_demand_statistics, name='supply_vs_demand_statistics'),
 
     # Equity bank Payments
-    path('request-payment-equity/<int:breader_trade_id>/', request_payment, name='request_payment'),
+    path('api/request-payment-equity/<int:breader_trade_id>/', request_payment, name='request_payment'),
 
 
 
@@ -140,7 +140,6 @@ urlpatterns = [
     path('swagger/<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
     path('', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
-
 ]
 
 # Only add this when we are in debug mode.

@@ -8,8 +8,6 @@ class EquityBankPayment(models.Model):
     payment_method = models.CharField(max_length=20)
     payment_status = models.CharField(max_length=20, default='pending')  # Set default value
     payer_name = models.ForeignKey(Abattoir, on_delete=models.CASCADE)  # Name of the person making the payment
-    payer_email = models.EmailField()  # Email of the person making the payment
-    payment_description = models.TextField()  # Additional description of the payment
     
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)

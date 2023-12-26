@@ -33,7 +33,7 @@ class BreaderTrade(models.Model):
 
     breeder = models.ForeignKey(CustomUser, on_delete=models.CASCADE, default=1)
     abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
-    transaction_date = models.DateTimeField(auto_now_add=True)
+    transaction_date = models.DateField(auto_now_add=True)
     breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
     breeds_supplied = models.PositiveIntegerField(default=0)
     goat_weight = models.PositiveIntegerField(default=0)
@@ -42,15 +42,15 @@ class BreaderTrade(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     phone_number = PhoneNumberField(null=True)
     payment_status = models.CharField(max_length=20, default='pending')  # 'pending', 'completed', 'failed'
-
+    bank_account_number = models.CharField(max_length=30)
     
     def __str__(self):
-        formatted_date = self.transaction_date.strftime('%d %b %Y %H:%M:%S')
+        formatted_date = self.transaction_date.strftime('%Y-%m-%d')
         return f"{self.breeder.market} from {self.breeder.community} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
 
 # @receiver(post_save, sender=BreaderTrade)
 # def update_breads_supplied(sender, instance, **kwargs):
-#     # Update breeds_supplied field after saving
+#     # Update breeds_supplied field after saving   
 #     aggregated_sum = BreaderTrade.objects.filter(breader=instance.breader).aggregate(models.Sum('breads_supplied'))['breads_supplied__sum']
 #     print(f"Aggregated sum for {instance.breader}: {aggregated_sum}")
 #     instance.breads_supplied = aggregated_sum if aggregated_sum is not None else 0

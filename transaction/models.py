@@ -45,21 +45,20 @@ class BreaderTrade(models.Model):
     phone_number = PhoneNumberField(null=True)
     payment_status = models.CharField(max_length=20, default='pending')  # 'pending', 'completed', 'failed'
     bank_account_number = models.CharField(max_length=30)
-    reference = models.CharField(max_length=30, unique=True, editable=False)
+    reference = models.CharField(max_length=20, unique=True, editable=False)
 
     def save(self, *args, **kwargs):
         # Generate a unique reference when saving the object
         if not self.reference:
             # Use the current date and time if transaction_date is None
             transaction_date = self.transaction_date or datetime.now()
-            self.reference = f"{transaction_date.strftime('%Y%m%d%H%M%S')}-{self.breeder.id}-{self.id}"
+            self.reference = f"{transaction_date.strftime('%y%m%d%H%M%S')}"
 
         super().save(*args, **kwargs)
-    
+
     def __str__(self):
         formatted_date = self.transaction_date.strftime('%Y-%m-%d')
         return f"{self.breeder.market} from {self.breeder.community} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
-
 # @receiver(post_save, sender=BreaderTrade)
 # def update_breads_supplied(sender, instance, **kwargs):
 #     # Update breeds_supplied field after saving   

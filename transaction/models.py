@@ -40,6 +40,7 @@ class BreaderTrade(models.Model):
     breeds_supplied = models.PositiveIntegerField(default=0)
     goat_weight = models.PositiveIntegerField(default=0)
     vaccinated = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
     # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     phone_number = PhoneNumberField(null=True)
@@ -52,13 +53,13 @@ class BreaderTrade(models.Model):
         if not self.reference:
             # Use the current date and time if transaction_date is None
             transaction_date = self.transaction_date or datetime.now()
-            self.reference = f"{transaction_date.strftime('%y%m%d%H%M%S')}"
+            self.reference = f"{transaction_date.strftime('%y%m%d%H%M')}"
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        formatted_date = self.transaction_date.strftime('%Y-%m-%d')
-        return f"{self.breeder.market} from {self.breeder.community} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {formatted_date}"
+        # formatted_date = self.created_at.strftime('%Y-%m-%d')
+        return f"{self.breeder.market} from {self.breeder.community} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {self.created_at}"
 # @receiver(post_save, sender=BreaderTrade)
 # def update_breads_supplied(sender, instance, **kwargs):
 #     # Update breeds_supplied field after saving   

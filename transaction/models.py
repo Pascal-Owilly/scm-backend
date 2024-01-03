@@ -41,11 +41,7 @@ class BreaderTrade(models.Model):
     goat_weight = models.PositiveIntegerField(default=0)
     vaccinated = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    # Add the new fields
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
-    phone_number = PhoneNumberField(null=True)
-    payment_status = models.CharField(max_length=20, default='pending')  # 'pending', 'completed', 'failed'
-    bank_account_number = models.CharField(max_length=30)
     reference = models.CharField(max_length=20, unique=True, editable=False)
 
     def save(self, *args, **kwargs):

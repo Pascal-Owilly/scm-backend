@@ -50,7 +50,8 @@ from custom_registration.views import (
     UserProfileViewSet,
     GetUserRole,
     UserProfilesListView,
-    RoleListView
+    RoleListView,
+    PaymentViewSet
 )
 
 # Payments

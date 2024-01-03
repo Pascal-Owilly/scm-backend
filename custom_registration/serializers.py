@@ -1,8 +1,9 @@
 # serializers.py
 from rest_framework import serializers
-from .models import CustomUser, UserProfile, Pay    
+from .models import CustomUser, UserProfile, Payment  
 from rest_framework_simplejwt.tokens import RefreshToken
-
+from transaction.serializers import BreaderTradeSerializer
+from transaction.models import BreaderTrade
 class RoleSerializer(serializers.Serializer):
     roleChoices = serializers.ListField()
 
@@ -67,11 +68,17 @@ class LogoutSerializer(serializers.Serializer):
 
 # serializers.py
 
-
 class PaymentSerializer(serializers.ModelSerializer):
     breeder_trade = BreaderTradeSerializer()
 
     class Meta:
         model = Payment
-        fields = '__all__'
+        fields = ['status', 'breeder_trade', 'payment_code', 'payment_initiation_date']
+
+    def create(self, validated_data):
+        breeder_trade_data = validated_data.pop('breeder_trade')
+        breeder_trade_instance = BreaderTrade.objects.create(**breeder_trade_data)
+        payment_instance = Payment.objects.create(breeder_trade=breeder_trade_instance, **validated_data)
+        return payment_instance
+
 

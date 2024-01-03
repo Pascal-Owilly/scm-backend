@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import CustomUser, UserProfile
+from .models import CustomUser, UserProfile, Pay    
 from rest_framework_simplejwt.tokens import RefreshToken
 
 class RoleSerializer(serializers.Serializer):
@@ -62,3 +62,16 @@ class LogoutSerializer(serializers.Serializer):
     Serializer for handling the logout response.
     """
     detail = serializers.CharField(default="Logout successful.")
+
+# payment
+
+# serializers.py
+
+
+class PaymentSerializer(serializers.ModelSerializer):
+    breeder_trade = BreaderTradeSerializer()
+
+    class Meta:
+        model = Payment
+        fields = '__all__'
+

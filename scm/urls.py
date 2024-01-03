@@ -87,6 +87,11 @@ router.register(r'register', CustomUserRegistrationViewSet, basename='register')
 router.register(r'logout', CustomLogoutViewSet, basename='logout')
 router.register(r'profiles', UserProfileViewSet, basename='profile')
 
+# Payments
+
+router.register(r'payments-to-breeder', PaymentViewSet, basename='payment_to_breeder')
+
+
 
 # Invoice
 

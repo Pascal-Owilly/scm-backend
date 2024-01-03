@@ -7,7 +7,7 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 
-from .models import CustomUser, UserProfile
+from .models import CustomUser, UserProfile, Payment
 from rest_framework import status
 
 from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer
@@ -190,3 +190,28 @@ class CustomLogoutViewSet(viewsets.ViewSet):
         serializer.is_valid()
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+# Payment
+
+class PaymentViewSet(viewsets.ModelViewSet):
+    queryset = Payment.objects.all()
+    serializer_class = PaymentSerializer
+
+    @action(detail=True, methods=['get'])
+    def notify_breeder(self, request, *args, **kwargs):
+        instance = self.get_object()
+
+        # Additional logic related to payment details can be performed here
+        # For example, check payment status, update related models, log information, etc.
+
+        # Send email to breeder about payment and breeder trade status
+        subject = f"Payment and Breeder Trade Status - {instance.payment_code}"
+        message = render_to_string('payment_and_breeder_trade_status_email_template.html', {'payment': instance})
+        plain_message = strip_tags(message)
+        from_email = 'your_email@example.com'  # replace with your email
+        to_email = [instance.breeder_trade.breeder.email]
+
+        send_mail(subject, plain_message, from_email, to_email, html_message=message)
+
+        # Serialize the payment data and return the response
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

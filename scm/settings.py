@@ -141,11 +141,40 @@ MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
 # }
 
 # SIGNALS_MODULE = 'custom_registration.signals'
-
+# start gmail
 AUTH_USER_MODEL = 'custom_registration.CustomUser'
 
 ROOT_URLCONF = 'scm.urls'
-EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+# EMAIL_BACKEND = 'allauth.account.auth_backends.AuthenticationBackend'
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587  # Use the appropriate port for your SMTP server
+# EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
+# EMAIL_HOST_USER = 'pascalouma54@gmai.com'  # Your email address
+# EMAIL_HOST_PASSWORD = 'drexill48'  # Your email password
+# # EMAIL_USE_SSL = True 
+
+# send emais using OAuth
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'pascalouma54@gmai.com'  # Use your Gmail address
+
+# Set EMAIL_HOST_PASSWORD to 'oauth2' to indicate that OAuth 2.0 will be used
+EMAIL_HOST_PASSWORD = 'oauth2'
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'APP': {
+            'client_id': 'your_google_client_id',
+            'secret': 'your_google_client_secret',
+            'key': '',
+        }
+    }
+}
+# end gmail
 
 ACCOUNT_EMAIL_REQUIRED = True
 EMAIL_CONFIRM_REDIRECT_BASE_URL = \
@@ -186,6 +215,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'allauth.account.context_processors.account',
+                'allauth.socialaccount.context_processors.socialaccount',
             ],
         },
     },

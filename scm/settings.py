@@ -143,9 +143,9 @@ MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
 
 # SIGNALS_MODULE = 'custom_registration.signals'
 # start gmail
-AUTH_USER_MODEL = 'custom_registration.CustomUser'
+# AUTH_USER_MODEL = 'custom_registration.CustomUser'
 
-ROOT_URLCONF = 'scm.urls'
+# ROOT_URLCONF = 'scm.urls'
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 # EMAIL_BACKEND = 'allauth.account.auth_backends.AuthenticationBackend'
 # EMAIL_HOST = 'smtp.gmail.com'
@@ -153,31 +153,31 @@ ROOT_URLCONF = 'scm.urls'
 # EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
 # EMAIL_HOST_USER = 'pascalouma54@gmai.com'  # Your email address
 # EMAIL_HOST_PASSWORD = ''
-# # EMAIL_USE_SSL = True 
+# EMAIL_USE_SSL = True 
 
 # send emais using OAuth
 
 # Build the absolute path to the 'credentials.json' file
-credentials_file_path = BASE_DIR / 'custom_registration' / 'credentials.json'
+# credentials_file_path = BASE_DIR / 'custom_registration' / 'credentials.json'
 
-# Load credentials from the 'credentials.json' file
-with open(credentials_file_path) as f:
-    credentials = json.load(f)
+# # Load credentials from the 'credentials.json' file
+# with open(credentials_file_path) as f:
+#     credentials = json.load(f)
 
-# Extract Google credentials
-GOOGLE_CLIENT_ID = credentials['google']['client_id']
-GOOGLE_CLIENT_SECRET = credentials['google']['client_secret']
+# # Extract Google credentials
+# GOOGLE_CLIENT_ID = credentials['google']['client_id']
+# GOOGLE_CLIENT_SECRET = credentials['google']['client_secret']
 
-# Use the extracted credentials in your Django settings
-SOCIALACCOUNT_PROVIDERS = {
-    'google': {
-        'APP': {
-            'client_id': GOOGLE_CLIENT_ID,
-            'secret': GOOGLE_CLIENT_SECRET,
-            'key': '',
-        }
-    }
-}
+# # Use the extracted credentials in your Django settings
+# SOCIALACCOUNT_PROVIDERS = {
+#     'google': {
+#         'APP': {
+#             'client_id': GOOGLE_CLIENT_ID,
+#             'secret': GOOGLE_CLIENT_SECRET,
+#             'key': '',
+#         }
+#     }
+# }
 
 EMAIL_BACKEND = 'custom_registration.custom_email_backend.OAuthEmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'

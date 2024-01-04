@@ -135,6 +135,10 @@ urlpatterns = [
     # path('make_payment/<int:breeder_trade_id>/', make_payment, name='make_payment'),
     path('api/make-payment/<int:breeder_trade_id>/', make_payment, name='make_epayment'),
 
+    # Search breeder by code 
+    path('api/breeder-code/search-payment-by-code/', PaymentViewSet.as_view({'get': 'search_payment_by_code'}), name='search-payment-by-code'),
+
+
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
     # path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views

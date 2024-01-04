@@ -7,6 +7,7 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
+from django.shortcuts import get_object_or_404
 
 from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService
 from rest_framework import status
@@ -171,6 +172,9 @@ class CustomUserLoginViewSet(viewsets.ViewSet):
             'email': user.email,
             'first_name': user.first_name,
             'last_name': user.last_name,
+            'phone_number': user.phone_number,
+            'bank_account_number': user.bank_account_number,
+            'email': user.email,
             'community': user.community,  
             'county': user.county, 
             'head_of_family':user.head_of_family,
@@ -302,3 +306,16 @@ class PaymentViewSet(viewsets.ModelViewSet):
         else:
             # Handle payment failure, return an appropriate response
             return Response({'error': 'Payment processing failed'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Search breeder details by code
+
+    @action(detail=False, methods=['get'])
+    def search_payment_by_code(self, request, *args, **kwargs):
+        payment_code = request.query_params.get('payment_code')
+        if not payment_code:
+            return Response({'error': 'Payment code parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
+        # Query the database for the payment with the given payment_code
+        payment = get_object_or_404(Payment, payment_code=payment_code)
+        # Serialize the payment data and return the response
+        serializer = self.get_serializer(payment)
+        return Response(serializer.data)

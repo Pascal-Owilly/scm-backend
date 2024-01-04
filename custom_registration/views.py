@@ -251,7 +251,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
             message = render_to_string('payment_and_breeder_trade_status_email_template.html', context)
             plain_message = strip_tags(message)
-            from_email = 'owillypascal@gmail.com'  
+            from_email = 'pascalouma54@gmail.com'  
             to_email = [instance.breeder_trade.breeder.email]
 
             send_mail(subject, plain_message, from_email, to_email, html_message=message)

@@ -34,7 +34,8 @@ class BankBranch(models.Model):
     head_office = models.CharField(max_length=100)
 
     def __str__(self):
-        return self.bank_branch_name
+        return self.bank_branch_name  
+
 
 class Payment(models.Model):
 
@@ -125,6 +126,30 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+class BankTeller(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
+    bank_branch = models.ForeignKey(BankBranch, on_delete=models.CASCADE)  
+
+    def __str__(self):
+
+        return self.user.first_name
+
+class CustomerService(models.Model):
+    TRANSACTION_TYPES = [
+        ('BANK', 'Bank Transfer'),
+        ('MPESA', 'M-Pesa'),
+    ]
+
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+    transaction_reference = models.CharField(max_length=255)
+    transaction_date = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.first_name} - {self.transaction_type} "
+
 
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

@@ -8,7 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 
-from .models import CustomUser, UserProfile, Payment
+from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService
 from rest_framework import status
 
 from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer
@@ -247,17 +247,57 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 'payment': instance,
                 'success_message': 'You will receive the payment once the processing is complete.',
                 'breeder_name': breeder_name,
+                'price': instance.breeder_trade.price,
+                'payment_initiation_date': instance.payment_initiation_date,
             }
 
             message = render_to_string('payment_and_breeder_trade_status_email_template.html', context)
             plain_message = strip_tags(message)
-            from_email = 'pascalouma54@gmail.com'  
+            from_email = 'pascalouma54@gmail.com'
             to_email = [instance.breeder_trade.breeder.email]
 
             send_mail(subject, plain_message, from_email, to_email, html_message=message)
 
             # Serialize the payment data and return the response
             serializer = self.get_serializer(instance)
+
+            # Additional logic to send emails to BankTeller and CustomerService
+            # Replace the following lines with your actual email sending logic
+
+            # Send email to BankTeller
+            # Send email to BankTeller
+            # Send email to BankTeller
+            bank_teller_emails = BankTeller.objects.values_list('user__email', flat=True)
+            bank_teller_subject = 'Bank Teller Notification'
+
+            # Add payment code to the context
+            bank_teller_context = {
+                'payment': instance,
+                'success_message': 'Payment has been initiated. Please review the details.',
+                'payment_code': instance.payment_code,
+            }
+
+            # Use bank teller email template
+            bank_teller_message = render_to_string('bank_teller_status_email_template.html', bank_teller_context)
+
+            send_mail(bank_teller_subject, strip_tags(bank_teller_message), from_email, bank_teller_emails, html_message=bank_teller_message)
+
+            # Send email to CustomerService
+            customer_service_emails = CustomerService.objects.values_list('user__email', flat=True)
+            customer_service_subject = 'Customer Service Notification'
+
+            # Add relevant context for Customer Service
+            customer_service_context = {
+                'payment': instance,
+                'success_message': 'A new payment has been processed. Please review the details.',
+                'additional_info': 'You may need to take further action based on the payment details.',
+            }
+
+            # Use customer service email template
+            customer_service_message = render_to_string('customer_service_status_email_template.html', customer_service_context)
+
+            send_mail(customer_service_subject, strip_tags(customer_service_message), from_email, customer_service_emails, html_message=customer_service_message)
+
             return Response(serializer.data)
         else:
             # Handle payment failure, return an appropriate response

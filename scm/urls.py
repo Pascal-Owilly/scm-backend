@@ -137,7 +137,7 @@ urlpatterns = [
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),
-    path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
+    # path('accounts/', include('allauth.account.urls')),  # This includes allauth's registration views
     # path('auth/', include('accounts.urls')),
     # path('registration/', include('custom_registration.urls')),
     path('drf/', include('rest_framework.urls', namespace='rest_framework')),

@@ -182,6 +182,7 @@ class CustomUserLoginViewSet(viewsets.ViewSet):
         return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=200)
 
 class CustomLogoutViewSet(viewsets.ViewSet):
+    
     def create(self, request, *args, **kwargs):
         # Perform any additional actions you need before logging out
         # For example, invalidate the user's token if you're using token-based authentication

@@ -15,8 +15,9 @@ import os
 import datetime
 from decouple import config, Csv
 from dotenv import load_dotenv
+import json
+from custom_registration.custom_email_backend import OAuthEmailBackend
 
-# settings.py
 
 # Load environment variables from .env
 load_dotenv()
@@ -151,29 +152,57 @@ ROOT_URLCONF = 'scm.urls'
 # EMAIL_PORT = 587  # Use the appropriate port for your SMTP server
 # EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
 # EMAIL_HOST_USER = 'pascalouma54@gmai.com'  # Your email address
-# EMAIL_HOST_PASSWORD = 'drexill48'  # Your email password
+# EMAIL_HOST_PASSWORD = ''
 # # EMAIL_USE_SSL = True 
 
 # send emais using OAuth
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'pascalouma54@gmai.com'  # Use your Gmail address
+# Build the absolute path to the 'credentials.json' file
+credentials_file_path = BASE_DIR / 'custom_registration' / 'credentials.json'
 
-# Set EMAIL_HOST_PASSWORD to 'oauth2' to indicate that OAuth 2.0 will be used
-EMAIL_HOST_PASSWORD = 'oauth2'
+# Load credentials from the 'credentials.json' file
+with open(credentials_file_path) as f:
+    credentials = json.load(f)
 
+# Extract Google credentials
+GOOGLE_CLIENT_ID = credentials['google']['client_id']
+GOOGLE_CLIENT_SECRET = credentials['google']['client_secret']
+
+# Use the extracted credentials in your Django settings
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
         'APP': {
-            'client_id': 'your_google_client_id',
-            'secret': 'your_google_client_secret',
+            'client_id': GOOGLE_CLIENT_ID,
+            'secret': GOOGLE_CLIENT_SECRET,
             'key': '',
         }
     }
 }
+
+EMAIL_BACKEND = 'custom_registration.custom_email_backend.OAuthEmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'pascalouma54@gmail.com'  # Use your Gmail address
+EMAIL_USE_SSL = False 
+
+# Set EMAIL_HOST_PASSWORD to 'oauth2' to indicate that OAuth 2.0 will be used
+EMAIL_HOST_PASSWORD = 'oauth2'
+
+
+
+# from django.contrib.sites.models import Site
+# from allauth.socialaccount.models import SocialApp
+
+# site = Site.objects.get_current()
+# google_app = SocialApp.objects.create(
+#     provider='google',
+#     name='Google',
+#     client_id='your_google_client_id',
+#     secret='your_google_client_secret',
+# )
+
+# google_app.sites.add(site)
 # end gmail
 
 ACCOUNT_EMAIL_REQUIRED = True
@@ -215,8 +244,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'allauth.account.context_processors.account',
-                'allauth.socialaccount.context_processors.socialaccount',
+                # 'allauth.account.context_processors.account',
+                # 'allauth.socialaccount.context_processors.socialaccount',
             ],
         },
     },

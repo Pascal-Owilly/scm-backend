@@ -51,7 +51,7 @@ from custom_registration.views import (
     GetUserRole,
     UserProfilesListView,
     RoleListView,
-    PaymentViewSet
+    PaymentViewSet, CustomerServiceViewSet
 )
 
 # Payments
@@ -91,6 +91,9 @@ router.register(r'profiles', UserProfileViewSet, basename='profile')
 # Payments
 
 router.register(r'payments-to-breeder', PaymentViewSet, basename='payment_to_breeder')
+
+# Customer service
+router.register(r'customer-service', CustomerServiceViewSet, basename='customer-service')
 
 
 
@@ -134,9 +137,14 @@ urlpatterns = [
     # Equity bank Payments
     # path('make_payment/<int:breeder_trade_id>/', make_payment, name='make_payment'),
     path('api/make-payment/<int:breeder_trade_id>/', make_payment, name='make_epayment'),
-
+   # paymens list
+    path('api/payments-list/', PaymentViewSet.as_view({'get': 'list_payments'}), name='list_payments'),
+  
     # Search breeder by code 
     path('api/breeder-code/search-payment-by-code/', PaymentViewSet.as_view({'get': 'search_payment_by_code'}), name='search-payment-by-code'),
+    
+    # customer service viewset
+
 
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),

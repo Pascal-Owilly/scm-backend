@@ -1,9 +1,10 @@
 # serializers.py
 from rest_framework import serializers
-from .models import CustomUser, UserProfile, Payment  
+from .models import CustomUser, UserProfile, Payment, CustomerService
 from rest_framework_simplejwt.tokens import RefreshToken
 from transaction.serializers import BreaderTradeSerializer
 from transaction.models import BreaderTrade
+
 class RoleSerializer(serializers.Serializer):
     roleChoices = serializers.ListField()
 
@@ -81,4 +82,8 @@ class PaymentSerializer(serializers.ModelSerializer):
         payment_instance = Payment.objects.create(breeder_trade=breeder_trade_instance, **validated_data)
         return payment_instance
 
+class CustomerServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomerService
+        fields = '__all__'
 

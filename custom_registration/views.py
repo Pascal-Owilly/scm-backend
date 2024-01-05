@@ -12,7 +12,7 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService
 from rest_framework import status
 
-from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer
+from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer, CustomerServiceSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.views import LogoutView
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -20,6 +20,7 @@ from .serializers import RoleSerializer, PaymentSerializer
 from django.template.loader import render_to_string  # Add this import
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
+from transaction.models import BreaderTrade
 
 class GetUserRole(APIView):
     def get(self, request):
@@ -208,13 +209,31 @@ class PaymentViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        
+
+        # Extract the 'id' from the request data
+        breeder_trade_id = request.data.get('id')
+
+        try:
+            # Get the corresponding BreaderTrade instance
+            breeder_trade = BreaderTrade.objects.get(pk=breeder_trade_id)
+        except BreaderTrade.DoesNotExist:
+            # Handle the case where the BreaderTrade instance doesn't exist
+            return Response({'error': 'BreaderTrade instance does not exist'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Create the payment and associate it with the BreaderTrade instance
+        payment = serializer.save(breeder_trade=breeder_trade)
+
         # Additional logic related to payment creation can be performed here
         # For example, generate payment code, send confirmation email, etc.
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def list_payments(self, request, *args, **kwargs):
+        # Retrieve all payments
+        payments = self.get_queryset()
+        serializer = self.get_serializer(payments, many=True)
+        return Response(serializer.data)
 
     def process_payment(self):
         # Example: Update payment status to 'Paid'
@@ -319,3 +338,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         # Serialize the payment data and return the response
         serializer = self.get_serializer(payment)
         return Response(serializer.data)
+
+class CustomerServiceViewSet(viewsets.ModelViewSet):
+    queryset = CustomerService.objects.all()
+    serializer_class = CustomerServiceSerializer

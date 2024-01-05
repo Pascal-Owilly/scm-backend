@@ -53,7 +53,7 @@ class Payment(models.Model):
     payment_code = models.CharField(max_length=50, unique=True, editable=False)
     payment_initiation_date = models.DateTimeField(auto_now_add=True)
     status = models.CharField(choices=STATUS_CHOICES, default=SENT_TO_BANK, max_length=100)
-    breeder_trade = models.ForeignKey('transaction.BreaderTrade', on_delete=models.CASCADE)  
+    breeder_trade = models.ForeignKey('transaction.BreaderTrade', on_delete=models.CASCADE)
 
     def process_payment(self):
         # Example: Update payment status to 'Paid'

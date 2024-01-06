@@ -32,6 +32,8 @@ class BreaderTradeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AbattoirPaymentToBreaderSerializer(serializers.ModelSerializer):
+    breeder_trade = BreaderTradeSerializer()  # Include the BreaderTradeSerializer here
+
     class Meta:
         model = AbattoirPaymentToBreader
         fields = '__all__'

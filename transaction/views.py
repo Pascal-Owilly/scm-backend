@@ -207,20 +207,22 @@ class AbattoirPaymentToBreaderViewSet(viewsets.ModelViewSet):
 
         # Search breeder details by code
 
-    @action(detail=False, methods=['get'])
+    @action(detail=False, methods=['GET'])
     def search_payment_by_code(self, request, *args, **kwargs):
         payment_code = request.query_params.get('payment_code')
         if not payment_code:
             return Response({'error': 'Payment code parameter is required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Query the database for the payment with the given payment_code
-        payment = get_object_or_404(AbattoirPaymentToBreader, payment_code=payment_code)
-        
-        # Check if the payment is related to a BreaderTrade
-        if payment.breeder_trade:
-            serializer = AbattoirPaymentToBreaderSerializer(payment)
-            return Response(serializer.data)
-        else:
-            return Response({'error': 'Payment not found or not related to any BreaderTrade'}, status=status.HTTP_404_NOT_FOUND)
-
+        try:
+            # Query the database for the payment with the given payment_code
+            payment = AbattoirPaymentToBreader.objects.get(payment_code=payment_code)
+            
+            # Check if the payment is related to a BreaderTrade
+            if payment.breeder_trade:
+                serializer = AbattoirPaymentToBreaderSerializer(payment)
+                return Response(serializer.data)
+            else:
+                return Response({'error': 'Payment not found or not related to any BreaderTrade'}, status=status.HTTP_404_NOT_FOUND)
+        except AbattoirPaymentToBreader.DoesNotExist:
+            return Response({'error': 'Payment not found'}, status=status.HTTP_404_NOT_FOUND)
 # END PAYMENT

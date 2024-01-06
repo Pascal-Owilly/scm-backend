@@ -40,6 +40,8 @@ from allauth.account.views import (
 #     GetUserRole,
 # )
 
+from transaction.views import AbattoirPaymentToBreaderViewSet
+
 from custom_registration.views import (
     CustomTokenObtainPairView,
     CustomUserLoginViewSet,
@@ -81,6 +83,11 @@ router.register(r'slaughtered-list', SlaughterhouseRecordViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
 
+# 
+router.register(r'abattoir-payments-to-breeder', AbattoirPaymentToBreaderViewSet, basename='abattoir-payments-to-breeder')
+
+router.register(r'abattoir-payments-to-breeders/search-payment-by-code', AbattoirPaymentToBreaderViewSet, basename='search-payment-by-code')
+
 # custom registration
 
 router.register(r'login', CustomUserLoginViewSet, basename='login')
@@ -90,7 +97,8 @@ router.register(r'profiles', UserProfileViewSet, basename='profile')
 
 # Payments
 
-router.register(r'payments-to-breeder', PaymentViewSet, basename='payment_to_breeder')
+# router.register(r'payments-to-breeder', PaymentViewSet, basename='payment_to_breeder')
+router.register(r'payments-to-breeder', AbattoirPaymentToBreaderViewSet, basename='payment_to_breeder')
 
 # Customer service
 router.register(r'customer-service', CustomerServiceViewSet, basename='customer-service')
@@ -141,11 +149,9 @@ urlpatterns = [
     path('api/payments-list/', PaymentViewSet.as_view({'get': 'list_payments'}), name='list_payments'),
   
     # Search breeder by code 
-    path('api/breeder-code/search-payment-by-code/', PaymentViewSet.as_view({'get': 'search_payment_by_code'}), name='search-payment-by-code'),
+    path('api/abattoir-payments-to-breeder/search-payment-by-code/', AbattoirPaymentToBreaderViewSet.as_view({'get': 'search_payment_by_code'}), name='search-payment-by-code'),
     
     # customer service viewset
-
-
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),
     # path('api/csrf_token/', get_csrf_token, name='csrf_token'),

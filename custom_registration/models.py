@@ -5,6 +5,7 @@ import uuid
 import random
 import string
 from phonenumber_field.modelfields import PhoneNumberField
+from django.conf import settings
 
 class Status(models.Model):
     is_dormant = models.BooleanField()  
@@ -146,7 +147,7 @@ class CustomerService(models.Model):
 
 
 class UserProfile(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     
     def __str__(self):

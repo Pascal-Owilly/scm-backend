@@ -4,6 +4,9 @@ from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
 from custom_registration.models import CustomUser
 from datetime import datetime
+import uuid
+import random
+import string
 
 class Abattoir(models.Model):
 
@@ -74,9 +77,45 @@ class BreaderTrade(models.Model):
 
 
 class AbattoirPaymentToBreader(models.Model):
-    breader_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    SENT_TO_BANK = 'payment_initiated'
+    DISBURSED = 'disbursed'
+    PAID = 'paid'
+
+    STATUS_CHOICES = [
+        (SENT_TO_BANK, 'Sent to Bank for Payment Processing'),
+        (DISBURSED, 'Disbursed'),
+        (PAID, 'Paid'),
+    ]
+
+    payments_id = models.AutoField(primary_key=True)
+    breeder_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)
+    # amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_code = models.CharField(max_length=50, unique=True, editable=False)
+    payment_initiation_date = models.DateTimeField(auto_now_add=True)
+    # status = models.CharField(choices=STATUS_CHOICES, default=SENT_TO_BANK, max_length=100)
+
     payment_date = models.DateTimeField(auto_now_add=True)
 
+    def process_payment(self):
+        # Example: Update payment status to 'Paid'
+        self.status = self.SENT_TO_BANK
+        self.save()
+
+        # Add additional payment processing logic here
+        # For example, interact with a payment gateway, log payment details, etc.
+
+        # Return True if the payment was successful
+        return True
+
+    def generate_payment_code(self):
+        timestamp_str = datetime.now().strftime('%y%m%d%H%M%S')
+        random_chars = ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(5))
+        return f"{timestamp_str}{random_chars}"
+
+    def save(self, *args, **kwargs):
+        if not self.payment_code:
+            self.payment_code = self.generate_payment_code()
+        super().save(*args, **kwargs)
+
     def __str__(self):
-        return f"Payment of {self.amount} to {self.breader_trade.breeder} for {self.breader_trade}"
+        return f"Payment to {self.breeder_trade.breeder} for {self.breeder_trade}"

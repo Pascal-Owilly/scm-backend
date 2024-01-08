@@ -4,7 +4,6 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOICES
 from custom_registration.models import CustomUser
-import uuid
 
 class Buyer(models.Model):
     username = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
@@ -56,7 +55,8 @@ class Invoice(models.Model):
 @receiver(pre_save, sender=Invoice)
 def pre_save_invoice(sender, instance, **kwargs):
     if not instance.invoice_number:
-        # Generate a unique slug based on other fields and timestamp, then take the first 7 characters
+        # Generate a unique slug based on other fields, timestamp, and primary key
         timestamp = instance.invoice_date.strftime('%Y%m%d%H%M%S') if instance.invoice_date else 'nodate'
         slug = f'INV-{timestamp}-{instance.breed}-{instance.part_name}-{instance.sale_type}-{instance.quantity}-{instance.buyer_id}'
-        instance.invoice_number = slugify(slug)[:7]
+        instance.invoice_number = slugify(slug)
+

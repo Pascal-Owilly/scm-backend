@@ -10,6 +10,7 @@ from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import viewsets, status
 from .models import Invoice, Buyer
+from logistics.models import LogisticsStatus
 from .serializers import InvoiceSerializer, BuyerSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response

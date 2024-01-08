@@ -15,6 +15,8 @@ from slaughter_house.views import SlaughterhouseRecordViewSet
 from mpesa_payments.views import MpesaPaymentView
 from invoice_generator.views import InvoiceViewSet, BuyerViewSet
 from slaughter_house.views import supply_vs_demand_statistics
+from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet
+
 
 from dj_rest_auth.registration.views import (
     ResendEmailVerificationView,
@@ -102,6 +104,13 @@ router.register(r'payments-to-breeder', AbattoirPaymentToBreaderViewSet, basenam
 
 # Customer service
 router.register(r'customer-service', CustomerServiceViewSet, basename='customer-service')
+
+# Logistics management
+router.register(r'logistics-status', LogisticsStatusViewSet, basename='logistics')
+router.register(r'order', OrderViewSet, basename='order')
+router.register(r'shipment-progress', ShipmentProgressViewSet, basename='shipment-progress')
+router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')
+
 
 
 

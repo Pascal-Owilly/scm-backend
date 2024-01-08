@@ -32,17 +32,20 @@ class BreaderTradeSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class AbattoirPaymentToBreaderSerializer(serializers.ModelSerializer):
-    breeder_trade = BreaderTradeSerializer()  # Include the BreaderTradeSerializer here
+    breeder_trade = BreaderTradeSerializer()
 
     class Meta:
         model = AbattoirPaymentToBreader
         fields = '__all__'
 
     def create(self, validated_data):
-        # Extract the 'breeder_trade' instance from the validated data
-        breeder_trade_instance = validated_data.pop('breeder_trade')
+        # Extract the 'breeder_trade' data from the validated data
+        breeder_trade_data = validated_data.pop('breeder_trade')
 
-        # Set the 'breeder_trade' field with the BreaderTrade instance
+        # Retrieve an existing BreaderTrade instance based on some criteria (e.g., breeder_trade_id)
+        breeder_trade_instance = BreaderTrade.objects.get(id=breeder_trade_data.get('id'))
+
+        # Set the 'breeder_trade' field with the retrieved BreaderTrade instance
         validated_data['breeder_trade'] = breeder_trade_instance
 
         # Call the superclass create method with the modified data
@@ -51,4 +54,6 @@ class AbattoirPaymentToBreaderSerializer(serializers.ModelSerializer):
         print("Created Instance ID:", instance.payments_id)
 
         return instance
+
+
 

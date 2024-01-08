@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import Invoice, Buyer
 from custom_registration.models import CustomUser  
+from logistics.serializers import LogisticsStatusSerializer
 
 class BuyerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -8,6 +9,8 @@ class BuyerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class InvoiceSerializer(serializers.ModelSerializer):
+    # logistics_status = LogisticsStatusSerializer()  # Update this line
+
     buyer = BuyerSerializer(required=False)
 
     class Meta:
@@ -30,4 +33,5 @@ class InvoiceSerializer(serializers.ModelSerializer):
                     validated_data['buyer'] = user
 
             return super().create(validated_data)
+
 

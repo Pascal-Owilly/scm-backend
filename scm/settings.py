@@ -78,6 +78,7 @@ INSTALLED_APPS = [
     'invoice_generator.apps.InvoiceGeneratorConfig',
     'invoices',
     'payments',
+    'logistics',
 
         # 3rd party
 

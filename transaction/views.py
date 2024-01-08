@@ -87,20 +87,21 @@ class AbattoirPaymentToBreaderViewSet(viewsets.ModelViewSet):
     serializer_class = AbattoirPaymentToBreaderSerializer
 
     def create(self, request, *args, **kwargs):
-        print("Request Data:", request.data)
+        # Extract the 'breeder_trade_id' from the request data
+        breeder_trade_id = request.data.get('breeder_trade_id')
 
+        # Validate the payment data
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Extract the 'breeder_trade' instance from the request data
-        breeder_trade_instance = BreaderTrade.objects.get(pk=request.data.get('breeder_trade'))
-        print("Breeder Trade Instance:", breeder_trade_instance)
+        # Create the payment instance
+        payment_instance = serializer.save()
 
-        # Create the payment and associate it with the BreaderTrade instance
-        serializer.save(breeder_trade=breeder_trade_instance)
-
-        # Additional logic related to payment creation can be performed here
-        # For example, generate payment code, send confirmation email, etc.
+        # If breeder_trade_id is provided, associate the payment with the BreaderTrade
+        if breeder_trade_id:
+            breeder_trade_instance = BreaderTrade.objects.get(pk=breeder_trade_id)
+            payment_instance.breeder_trade = breeder_trade_instance
+            payment_instance.save()
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)

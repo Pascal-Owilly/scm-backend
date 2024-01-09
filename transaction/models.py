@@ -89,6 +89,8 @@ class AbattoirPaymentToBreader(models.Model):
 
     payments_id = models.AutoField(primary_key=True)
     breeder_trade = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)
+    # abattoir_payment = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE)
+
     # amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_code = models.CharField(max_length=50, unique=True, editable=False)
     payment_initiation_date = models.DateTimeField(auto_now_add=True)

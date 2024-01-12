@@ -133,6 +133,8 @@ MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
 # SIGNALS_MODULE = 'custom_registration.signals'
 # start gmail
 AUTH_USER_MODEL = 'custom_registration.CustomUser'
+# USERNAME_FIELD = 'email'
+
 # PASSWORD_RESET_CONFIRM_URL = 'password_reset_confirm'
 
 ROOT_URLCONF = 'scm.urls'
@@ -280,14 +282,18 @@ DATABASES = {
     }
 }
 
-AUTHENTICATION_BACKENDS = (
-    # ...
-    'allauth.account.auth_backends.AuthenticationBackend',
-    # ...
-)
+# AUTHENTICATION_BACKENDS = (
+#     # ...
+#     'allauth.account.auth_backends.AuthenticationBackend',
+#     # ...
+# )
+
+# AUTHENTICATION_BACKENDS = [
+#     'custom_registration.backends.EmailBackend',  # Replace with the path to your custom email backend
+# ]
+
 
 ACCOUNT_EMAIL_VERIFICATION = 'none'  # Disable email verification for simplicity
-
 
 
 

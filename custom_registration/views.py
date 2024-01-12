@@ -12,7 +12,8 @@ from django.shortcuts import get_object_or_404
 from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService
 from rest_framework import status
 
-from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer, CustomerServiceSerializer
+from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer, CustomerServiceSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer
+
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.views import LogoutView
 from rest_framework_simplejwt.views import TokenRefreshView
@@ -29,6 +30,8 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from django.urls import reverse
 from django.urls import reverse_lazy
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 
 
 class GetUserRole(APIView):
@@ -107,8 +110,12 @@ class PasswordResetRequestView(APIView):
             token = default_token_generator.make_token(user)
             reset_instance = PasswordReset.objects.create(user=user, token=token)
 
+            # Obtain uidb64 from the user instance
+            uidb64 = urlsafe_base64_encode(force_bytes(user.pk))
+
+
             # Construct reset link
-            reset_url = reverse_lazy('password-reset-confirm') + f'?uidb64={urlsafe_base64_encode(force_bytes(user.pk))}&token={token}'
+            reset_url = reverse_lazy('password-reset-confirm', kwargs={'uidb64': uidb64, 'token': token})
 
             # Compose email message
             subject = 'Password Reset Request'
@@ -132,13 +139,13 @@ class PasswordResetConfirmView(APIView):
 
     def post(self, request, uidb64, token):
         try:
-            uid = force_text(urlsafe_base64_decode(uidb64))
+            uid = force_str(urlsafe_base64_decode(uidb64))
             user = CustomUser.objects.get(pk=uid)
             reset_instance = PasswordReset.objects.get(user=user, token=token)
         except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist, PasswordReset.DoesNotExist):
             return Response({"detail": "Invalid reset link"}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = self.get_serializer(data=request.data)
+        serializer = PasswordResetConfirmSerializer(data=request.data)
         if serializer.is_valid():
             new_password = serializer.validated_data['new_password']
 

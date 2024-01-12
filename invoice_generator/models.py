@@ -56,7 +56,7 @@ class Invoice(models.Model):
 def pre_save_invoice(sender, instance, **kwargs):
     if not instance.invoice_number:
         # Generate a unique slug based on other fields, timestamp, and primary key
-        timestamp = instance.invoice_date.strftime('%Y%m%d%H%M%S') if instance.invoice_date else 'nodate'
+        timestamp = instance.invoice_date.strftime('%Y%m%d%H%M') if instance.invoice_date else 'nodate'
         slug = f'INV-{timestamp}-{instance.breed}-{instance.part_name}-{instance.sale_type}-{instance.quantity}-{instance.buyer_id}'
         instance.invoice_number = slugify(slug)
 

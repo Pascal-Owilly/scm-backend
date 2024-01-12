@@ -6,6 +6,8 @@ import random
 import string
 from phonenumber_field.modelfields import PhoneNumberField
 from django.conf import settings
+from django.contrib.auth.models import AbstractUser
+
 
 class Status(models.Model):
     is_dormant = models.BooleanField()  
@@ -152,5 +154,6 @@ class UserProfile(models.Model):
     
     def __str__(self):
         return self.user.username + ' Profile'
+
 
 

@@ -8,3 +8,4 @@ admin.site.register(Status)
 admin.site.register(Payment)
 admin.site.register(CustomerService)
 admin.site.register(BankTeller)
+

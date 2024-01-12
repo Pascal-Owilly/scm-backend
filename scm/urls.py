@@ -125,7 +125,7 @@ schema_view = get_schema_view(
       title="SCM APIs",
       default_version='v1',
       description="Test description",
-    #   contact=openapi.Contact(email="owillypascal@gmail.com"),
+      contact=openapi.Contact(email="owillypascal@gmail.com"),
       license=openapi.License(name="BSD License"),
    ),
 
@@ -159,6 +159,10 @@ urlpatterns = [
   
     # Search breeder by code 
     path('api/abattoir-payments-to-breeder/search-payment-by-code/', AbattoirPaymentToBreaderViewSet.as_view({'get': 'search_payment_by_code'}), name='search-payment-by-code'),
+
+    # logistics
+    path('api/logistics-status/<str:invoice_number>/', LogisticsStatusViewSet.as_view({'get': 'retrieve'}), name='logistics-status-detail'),
+
     
     # customer service viewset
 

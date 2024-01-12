@@ -22,6 +22,15 @@ from django.utils.html import strip_tags
 from django.core.mail import send_mail
 from transaction.models import BreaderTrade
 
+from .models import PasswordReset
+from .serializers import PasswordResetRequestSerializer, PasswordResetConfirmSerializer
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode
+from django.urls import reverse
+from django.urls import reverse_lazy
+
+
 class GetUserRole(APIView):
     def get(self, request):
         if request.user.is_authenticated:
@@ -83,6 +92,63 @@ class CustomUserRegistrationViewSet(viewsets.ViewSet):
             tokens = {'refresh': str(refresh), 'access': str(refresh.access_token)}
             return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=200)
         return Response(serializer.errors, status=400)
+
+class PasswordResetRequestView(APIView):
+    def post(self, request):
+        serializer = PasswordResetRequestSerializer(data=request.data)
+        if serializer.is_valid():
+            email = serializer.validated_data['email']
+            try:
+                user = CustomUser.objects.get(email=email)
+            except CustomUser.DoesNotExist:
+                return Response({"detail": "No account found with this email"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a password reset token and send it via email
+            token = default_token_generator.make_token(user)
+            reset_instance = PasswordReset.objects.create(user=user, token=token)
+
+            # Construct reset link
+            reset_url = reverse_lazy('password-reset-confirm') + f'?uidb64={urlsafe_base64_encode(force_bytes(user.pk))}&token={token}'
+
+            # Compose email message
+            subject = 'Password Reset Request'
+            context = {
+                'password_reset_url': reset_url,
+            }
+
+            message = render_to_string('password_reset_email.html', context)
+            plain_message = strip_tags(message)
+            from_email = 'pascalouma54@gmail.com'  # Replace with your email
+            to_email = [user.email]
+
+            send_mail(subject, plain_message, from_email, to_email, html_message=message)
+
+            return Response({"detail": "Check your email for password reset link "}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class PasswordResetConfirmView(APIView):
+    serializer_class = PasswordResetConfirmSerializer
+
+    def post(self, request, uidb64, token):
+        try:
+            uid = force_text(urlsafe_base64_decode(uidb64))
+            user = CustomUser.objects.get(pk=uid)
+            reset_instance = PasswordReset.objects.get(user=user, token=token)
+        except (TypeError, ValueError, OverflowError, CustomUser.DoesNotExist, PasswordReset.DoesNotExist):
+            return Response({"detail": "Invalid reset link"}, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            new_password = serializer.validated_data['new_password']
+
+            # Set the new password and delete the reset instance
+            user.set_password(new_password)
+            user.save()
+            reset_instance.delete()
+
+            return Response({"detail": "Password reset successful"}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class UserProfileViewSet(viewsets.ModelViewSet):
     queryset = UserProfile.objects.all()
@@ -288,8 +354,6 @@ class PaymentViewSet(viewsets.ModelViewSet):
             # Replace the following lines with your actual email sending logic
 
             # Send email to BankTeller
-            # Send email to BankTeller
-            # Send email to BankTeller
             bank_teller_emails = BankTeller.objects.values_list('user__email', flat=True)
             bank_teller_subject = 'Bank Teller Notification'
 
@@ -312,7 +376,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
             # Add relevant context for Customer Service
             customer_service_context = {
                 'payment': instance,
-                'success_message': 'A new payment has been processed. Please review the details.',
+                'success_message': 'A new payment has been initiated. Please review the details.',
                 'additional_info': 'You may need to take further action based on the payment details.',
             }
 

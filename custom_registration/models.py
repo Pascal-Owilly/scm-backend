@@ -7,6 +7,7 @@ import string
 from phonenumber_field.modelfields import PhoneNumberField
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.utils import timezone
 
 
 class Status(models.Model):
@@ -129,6 +130,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name}'
+
+class PasswordReset(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    token = models.CharField(max_length=255)
+    created_at = models.DateTimeField(default=timezone.now)
 
 class BankTeller(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)

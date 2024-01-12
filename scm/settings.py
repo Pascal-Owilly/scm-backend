@@ -133,6 +133,7 @@ MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
 # SIGNALS_MODULE = 'custom_registration.signals'
 # start gmail
 AUTH_USER_MODEL = 'custom_registration.CustomUser'
+# PASSWORD_RESET_CONFIRM_URL = 'password_reset_confirm'
 
 ROOT_URLCONF = 'scm.urls'
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

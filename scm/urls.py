@@ -55,7 +55,9 @@ from custom_registration.views import (
     GetUserRole,
     UserProfilesListView,
     RoleListView,
-    PaymentViewSet, CustomerServiceViewSet
+    PaymentViewSet, CustomerServiceViewSet,
+    PasswordResetRequestView,
+    PasswordResetConfirmView
 )
 
 # Payments
@@ -144,6 +146,9 @@ urlpatterns = [
     path('get-user-role/', GetUserRole.as_view(), name='get_user_role'),
     path('auth/all-profiles/', UserProfilesListView.as_view(), name='get_user_role'),
     path('api/roles/', RoleListView.as_view(), name='role-list'),
+
+    path('api/password-reset/', PasswordResetRequestView.as_view(), name='password-reset'),
+    path('api/password-reset/confirm/<str:uidb64>/<str:token>/', PasswordResetConfirmView.as_view(), name='password-reset-confirm'),
 
     path('api/', include(router.urls)),
     path('api/breader-count/', BreaderCountView.as_view(), name='breader-count'),

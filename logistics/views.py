@@ -10,13 +10,14 @@ class LogisticsStatusViewSet(viewsets.ModelViewSet):
     queryset = LogisticsStatus.objects.all().order_by('-timestamp')
     serializer_class = LogisticsStatusSerializer
 
-    def retrieve(self, request, *args, **kwargs):
-        invoice_number = self.kwargs.get('id')  # Assuming 'id' corresponds to invoice_number
-        print(f"Retrieving logistics status for invoice number: {invoice_number}")
+    # def retrieve(self, request, *args, **kwargs):
+    #     # invoice_id = self.kwargs.get('invoice_id')  # Use the correct parameter name
 
-        instance = get_object_or_404(LogisticsStatus, invoice__invoice_number=invoice_number)
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+    #     instance = get_object_or_404(LogisticsStatus, id=invoice_id)
+    #     print(f"Retrieving logistics status for invoice id: {instance}")
+
+    #     serializer = self.get_serializer(instance)
+    #     return Response(serializer.data)
 
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all().order_by('-date_created')

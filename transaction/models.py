@@ -121,3 +121,5 @@ class AbattoirPaymentToBreader(models.Model):
 
     def __str__(self):
         return f"Payment to {self.breeder_trade.breeder} for {self.breeder_trade}"
+
+

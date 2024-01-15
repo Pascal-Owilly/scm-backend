@@ -166,7 +166,7 @@ urlpatterns = [
     path('api/abattoir-payments-to-breeder/search-payment-by-code/', AbattoirPaymentToBreaderViewSet.as_view({'get': 'search_payment_by_code'}), name='search-payment-by-code'),
 
     # logistics
-    path('api/logistics-status/<str:invoice_number>/', LogisticsStatusViewSet.as_view({'get': 'retrieve'}), name='logistics-status-detail'),
+    path('api/logistics-status/<int:invoice_id>/', LogisticsStatusViewSet.as_view({'get': 'retrieve'}), name='logistics-status-detail'),
 
     
     # customer service viewset

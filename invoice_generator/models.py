@@ -93,6 +93,7 @@ class PurchaseOrder(models.Model):
     purchase_order_number = models.SlugField(max_length=255, unique=True, editable=False)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='pending')
     vendor_notification = models.TextField(blank=True)
+    _original_status = models.CharField(max_length=20, blank=True, null=True)  # New field for original status
 
     def __str__(self):
         return f'Purchase Order number #{self.purchase_order_number} for {self.buyer} - Status: {self.status}'
@@ -101,18 +102,20 @@ class PurchaseOrder(models.Model):
         return sum(item.total_price() for item in self.items.all())
 
     def save(self, *args, **kwargs):
-       if not self.purchase_order_number:
-           base_slug = 'PO'
-           timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-           max_existing_purchase_order_number = PurchaseOrder.objects.aggregate(models.Max('purchase_order_number'))['purchase_order_number__max']
-           if max_existing_purchase_order_number:
-               current_number = int(max_existing_purchase_order_number.split('-')[-1])
-               new_number = current_number + 1
-           else:
-               new_number = 1
-           self.purchase_order_number = f'{base_slug}-{new_number:03d}-{timestamp}'
-       super().save(*args, **kwargs)
+        if not self.purchase_order_number:
+            base_slug = 'PO'
+            timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
+            max_existing_purchase_order_number = PurchaseOrder.objects.aggregate(models.Max('purchase_order_number'))['purchase_order_number__max']
+            if max_existing_purchase_order_number:
+                current_number = int(max_existing_purchase_order_number.split('-')[-1])
+                new_number = current_number + 1
+            else:
+                new_number = 1
+            self.purchase_order_number = f'{base_slug}-{new_number:03d}-{timestamp}'
 
+        # Save the original status before saving the instance
+        if self.pk:
+            original_instance = PurchaseOrder.objects.get(pk=self.pk)
+            self._original_status = original_instance.status
 
-    def __str__(self):
-        return f'Purchase Order number: #{self.purchase_order_number} for {self.buyer} - Status: {self.status}'
+        super().save(*args, **kwargs)

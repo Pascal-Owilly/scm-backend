@@ -13,7 +13,7 @@ from inventory_management.views import InventoryBreedViewSet, InventoryBreedSale
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
-from invoice_generator.views import InvoiceViewSet, BuyerViewSet
+from invoice_generator.views import InvoiceViewSet, BuyerViewSet, NotifyBuyerView 
 from slaughter_house.views import supply_vs_demand_statistics
 from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet
 
@@ -167,6 +167,9 @@ urlpatterns = [
 
     # logistics
     path('api/logistics-status/<int:invoice_id>/', LogisticsStatusViewSet.as_view({'get': 'retrieve'}), name='logistics-status-detail'),
+
+    # Notify buyer
+    path('api/notify_buyer/<int:purchase_order_id>/', NotifyBuyerView.as_view(), name='notify_buyer'),
 
     
     # customer service viewset

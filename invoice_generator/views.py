@@ -7,13 +7,14 @@ from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
+from django.http import JsonResponse
 
 import logging
 
 from rest_framework import viewsets, status
-from .models import Invoice, Buyer
+from .models import Invoice, Buyer, Product, Item, PurchaseOrder
 from logistics.models import LogisticsStatus
-from .serializers import InvoiceSerializer, BuyerSerializer, PurchaseOrderSerializer
+from .serializers import InvoiceSerializer, BuyerSerializer, PurchaseOrderSerializer, ProductSerializer, ItemSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from custom_registration.models import CustomUser
@@ -24,9 +25,23 @@ from django.urls import reverse
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
+from .signals import status_change_signal
+
 # notify buyer upon each status change
 
 logger = logging.getLogger(__name__)
+
+def notify_buyer(purchase_order_id):
+    try:
+        purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
+
+        # Add your logic to notify the buyer here
+        # For example: send an email, trigger a notification, etc.
+
+        # For demonstration purposes, print a message to the console
+        print(f'Notification sent to buyer for purchase order #{purchase_order_id}')
+    except PurchaseOrder.DoesNotExist:
+        print(f'Error: Purchase Order with id {purchase_order_id} does not exist.')
 
 
 class InvoiceViewSet(viewsets.ModelViewSet):
@@ -65,8 +80,37 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 class BuyerViewSet(viewsets.ModelViewSet):
     queryset = Buyer.objects.all()
     serializer_class = BuyerSerializer
+    permission_classes = [IsAuthenticated]
+
+class PurchaseOrderViewSet(viewsets.ModelViewSet):
+    queryset = PurchaseOrder.objects.all()
+    serializer_class = PurchaseOrderSerializer
+
+    def create(self, request, *args, **kwargs):
+        # Customize the creation logic if needed
+        response = super().create(request, *args, **kwargs)
+        
+        # Notify the buyer upon submission (replace with your notification logic)
+        # For example: send an email, trigger a notification, etc.
+        purchase_order_id = response.data.get('id')  # Get the ID from the response data
+        notify_buyer(purchase_order_id)  # Pass the purchase order ID to notify_buyer
+
+        return response
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    # permission_classes = [IsAuthenticated]
+
+class ItemViewSet(viewsets.ModelViewSet):
+    queryset = Item.objects.all()
+    serializer_class = ItemSerializer
+    permission_classes = [IsAuthenticated]
+
 
 class NotifyBuyerView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, purchase_order_id):
         try:
             purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
@@ -144,3 +188,4 @@ class NotifyBuyerView(APIView):
         except Exception as e:
             logger.error(f"An error occurred: {e}")
             return Response({'message': 'Internal Server Error.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+

@@ -13,7 +13,7 @@ from inventory_management.views import InventoryBreedViewSet, InventoryBreedSale
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
-from invoice_generator.views import InvoiceViewSet, BuyerViewSet, NotifyBuyerView 
+from invoice_generator.views import InvoiceViewSet, BuyerViewSet, NotifyBuyerView, ProductViewSet, ItemViewSet, PurchaseOrderViewSet
 from slaughter_house.views import supply_vs_demand_statistics
 from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet
 
@@ -113,6 +113,11 @@ router.register(r'order', OrderViewSet, basename='order')
 router.register(r'shipment-progress', ShipmentProgressViewSet, basename='shipment-progress')
 router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')
 
+# Purchase order
+
+router.register(r'products', ProductViewSet, basename='product')
+router.register(r'items', ItemViewSet, basename='item')
+router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchaseorder')
 
 
 
@@ -171,7 +176,9 @@ urlpatterns = [
     # Notify buyer
     path('api/notify_buyer/<int:purchase_order_id>/', NotifyBuyerView.as_view(), name='notify_buyer'),
 
-    
+    #  create purchase order
+    # path('api/create-purchase-order/', create_purchase_order, name='create_purchase_order'),
+
     # customer service viewset
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),

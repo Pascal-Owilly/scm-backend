@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Invoice, Buyer, PurchaseOrder
+from .models import Invoice, Buyer, PurchaseOrder, Item, Product
 from custom_registration.models import CustomUser  
 from logistics.serializers import LogisticsStatusSerializer
 
@@ -34,9 +34,21 @@ class InvoiceSerializer(serializers.ModelSerializer):
 
             return super().create(validated_data)
 
+class ProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Product
+        fields = ('id', 'breed', 'part_name', 'sale_type', 'unit_price')
+
+class ItemSerializer(serializers.ModelSerializer):
+    # product = ProductSerializer(read_only=True)  
+
+    class Meta:
+        model = Item
+        fields = ('id', 'quantity', 'product')
+
 class PurchaseOrderSerializer(serializers.ModelSerializer):
+    # items = ItemSerializer()
+
     class Meta:
         model = PurchaseOrder
-        fields = '__all__'
-
-
+        fields = ('id', 'purchase_order_date', 'purchase_order_number', 'status', 'vendor_notification', '_original_status', 'buyer', 'items')

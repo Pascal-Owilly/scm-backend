@@ -4,7 +4,7 @@ from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder
 
 class LogisticsStatusSerializer(serializers.ModelSerializer):
     # Update the source to use 'id' instead of 'invoice.invoice_number'
-    invoice_id = serializers.ReadOnlyField(source='invoice.id')
+    invoice_number = serializers.ReadOnlyField(source='invoice.invoice_number')
 
     class Meta:
         model = LogisticsStatus
@@ -12,7 +12,7 @@ class LogisticsStatusSerializer(serializers.ModelSerializer):
 
 class OrderSerializer(serializers.ModelSerializer):
     # Update the source to use 'id' instead of 'invoice.invoice_number'
-    invoice_id = serializers.ReadOnlyField(source='invoice.id')
+    invoice_number = serializers.ReadOnlyField(source='invoice.invoice_number')
 
     class Meta:
         model = Order

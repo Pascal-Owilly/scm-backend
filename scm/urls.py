@@ -208,6 +208,7 @@ urlpatterns = [
     path('api/letter_of_credits/', lc_list, name='lc-list'),
     path('api/letter_of_credits/<int:pk>/', lc_detail, name='lc-detail'),
     path('api/letter_of_credits/<int:lc_id>/download/', download_lc_document, name='download-lc'),
+    
     # customer service viewset
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),

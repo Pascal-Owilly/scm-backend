@@ -1,48 +1,30 @@
 # invoice_generator/views.py
 from rest_framework import viewsets
-from .models import Invoice, Buyer, PurchaseOrder
+from .models import Invoice, Buyer
 from .serializers import InvoiceSerializer, BuyerSerializer
 from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.http import JsonResponse
+from rest_framework.decorators import api_view, permission_classes
 
-import logging
+from django.http import HttpResponse
+from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, status
-from .models import Invoice, Buyer, Product, Item, PurchaseOrder
+from .models import Invoice, Buyer, LetterOfCredit
 from logistics.models import LogisticsStatus
-from .serializers import InvoiceSerializer, BuyerSerializer, PurchaseOrderSerializer, ProductSerializer, ItemSerializer
+from .serializers import InvoiceSerializer, BuyerSerializer, LetterOfCreditSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from custom_registration.models import CustomUser
+from rest_framework.decorators import action
 
-from django.contrib import admin, messages
-from django.http import HttpResponseRedirect
-from django.urls import reverse
-from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
-from rest_framework.views import APIView
-from .signals import status_change_signal
 
-# notify buyer upon each status change
-
-logger = logging.getLogger(__name__)
-
-def notify_buyer(purchase_order_id):
-    try:
-        purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
-
-        # Add your logic to notify the buyer here
-        # For example: send an email, trigger a notification, etc.
-
-        # For demonstration purposes, print a message to the console
-        print(f'Notification sent to buyer for purchase order #{purchase_order_id}')
-    except PurchaseOrder.DoesNotExist:
-        print(f'Error: Purchase Order with id {purchase_order_id} does not exist.')
-
+class BuyerViewSet(viewsets.ModelViewSet):
+    queryset = Buyer.objects.all()
+    serializer_class = BuyerSerializer
 
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all().order_by('-invoice_date')
@@ -53,139 +35,123 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         try:
             # Check if a buyer is associated with the invoice
             buyer_data = serializer.validated_data.get('buyer', None)
-    
+
             if buyer_data:
                 # If a buyer is provided, create or retrieve the buyer
                 user, created = CustomUser.objects.get_or_create(**buyer_data)
 
                 # Update the serializer's buyer field with the CustomUser instance
-            serializer.validated_data['buyer'] = user  # Use the newly created or retrieved buyer
+                serializer.validated_data['buyer'] = user  # Use the newly created or retrieved buyer
 
             # Calculate the total price before saving the object
             serializer.validated_data['total_price'] = (
                 serializer.validated_data['quantity'] * serializer.validated_data['unit_price']
             )
             serializer.save()
+
         except Exception as e:
             print(f"Error in perform_create: {e}")
             raise
-        
+
+    
+
+class LetterOfCreditViewSet(viewsets.ModelViewSet):
+    queryset = LetterOfCredit.objects.all()
+    serializer_class = LetterOfCreditSerializer
+    permission_classes = [IsAuthenticated]
+    # lookup_field = 'pk'  # Ensure this line is present
 
     def get_queryset(self):
-        # Filter invoices based on the logged-in user
-        return Invoice.objects.filter(buyer=self.request.user)
+        # Filter letter of credits based on the logged-in user
+        return LetterOfCredit.objects.filter(buyer=self.request.user)
 
+    def send_email_notification(self, recipient_email, subject, message):
+        send_mail(
+            subject,
+            message,
+            'pascalouma54@gmail.com',  # 
+            [recipient_email],
+            fail_silently=False,
+        )
+    print(send_email_notification, 'sent')
 
-
-class BuyerViewSet(viewsets.ModelViewSet):
-    queryset = Buyer.objects.all()
-    serializer_class = BuyerSerializer
-    permission_classes = [IsAuthenticated]
-
-class PurchaseOrderViewSet(viewsets.ModelViewSet):
-    queryset = PurchaseOrder.objects.all()
-    serializer_class = PurchaseOrderSerializer
-
-    def create(self, request, *args, **kwargs):
-        # Customize the creation logic if needed
-        response = super().create(request, *args, **kwargs)
-        
-        # Notify the buyer upon submission (replace with your notification logic)
-        # For example: send an email, trigger a notification, etc.
-        purchase_order_id = response.data.get('id')  # Get the ID from the response data
-        notify_buyer(purchase_order_id)  # Pass the purchase order ID to notify_buyer
-
-        return response
-
-class ProductViewSet(viewsets.ModelViewSet):
-    queryset = Product.objects.all()
-    serializer_class = ProductSerializer
-    # permission_classes = [IsAuthenticated]
-
-class ItemViewSet(viewsets.ModelViewSet):
-    queryset = Item.objects.all()
-    serializer_class = ItemSerializer
-    permission_classes = [IsAuthenticated]
-
-
-class NotifyBuyerView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, purchase_order_id):
+    @action(detail=False, methods=['post'])
+    def upload_lc_document(self, request, *args, **kwargs):
         try:
-            purchase_order = PurchaseOrder.objects.get(pk=purchase_order_id)
+            # Retrieve the currently logged-in user
+            user = request.user
 
-            if purchase_order.status == 'pending':
-                # Update the purchase order status to 'under review'
-                purchase_order.status = 'under_review'
-                purchase_order.save()
+            user = request.user
+            print(f"User: {user}")
 
-                # Notify the buyer
-                buyer_message = f"Your purchase order (#{purchase_order.purchase_order_number}) has been received and is under review."
 
-                # Trigger the status_change_signal
-                status_change_signal.send(sender=PurchaseOrder, instance=purchase_order)
+            # Create the Letter of Credit
+            letter_of_credit = LetterOfCredit.objects.create(user=user, status='pending')
 
-                # Use your serializer to serialize the purchase order data
-                serializer = PurchaseOrderSerializer(purchase_order)
+            # Handle LC document upload
+            lc_document = request.FILES.get('lc_document')
+            letter_of_credit.lc_document = lc_document
+            letter_of_credit.save()
 
-                # Send an email to the buyer
-                subject = 'Purchase Order Received and Under Review'
-                message = f"Dear {purchase_order.buyer.username},\n\n{buyer_message}\n\nThank you!"
-                from_email = 'pascalouma54@gmail.com'  # Replace with your actual email
-                to_email = [purchase_order.buyer.username.email]
+            # Notify the buyer and bank about the successful upload
+            self.send_lc_upload_notification(letter_of_credit)
 
-                send_mail(subject, message, from_email, to_email, fail_silently=False)
-                logger.info("Email sent successfully")
+            return Response({'message': 'Letter of Credit document uploaded successfully.'}, status=status.HTTP_200_OK)
 
-                return Response({'message': buyer_message, 'purchase_order': serializer.data}, status=status.HTTP_200_OK)
-            elif purchase_order.status == 'approved':
-                # Add logic for approved status
-                purchase_order.status = 'approved'
-                purchase_order.save()
-
-                # Notify the buyer
-                buyer_message = f"Congratulations! Your purchase order (#{purchase_order.purchase_order_number}) has been approved."
-
-                # Use your serializer to serialize the purchase order data
-                serializer = PurchaseOrderSerializer(purchase_order)
-
-                # Send an email to the buyer
-                subject = 'Purchase Order Approved'
-                message = f"Dear {purchase_order.buyer.username},\n\n{buyer_message}\n\nThank you!"
-                from_email = 'pascalouma54@gmail.com'  # Replace with your actual email
-                to_email = [purchase_order.buyer.username.email]
-
-                send_mail(subject, message, from_email, to_email, fail_silently=False)
-                logger.info("Email sent successfully")
-
-                return Response({'message': buyer_message, 'purchase_order': serializer.data}, status=status.HTTP_200_OK)
-            elif purchase_order.status == 'declined':
-                # Add logic for declined status
-                purchase_order.status = 'declined'
-                purchase_order.save()
-
-                # Notify the buyer
-                buyer_message = f"Unfortunately, your purchase order (#{purchase_order.purchase_order_number}) has been declined."
-
-                # Use your serializer to serialize the purchase order data
-                serializer = PurchaseOrderSerializer(purchase_order)
-
-                # Send an email to the buyer
-                subject = 'Purchase Order Declined'
-                message = f"Dear {purchase_order.buyer.username},\n\n{buyer_message}\n\nThank you for your understanding."
-                from_email = 'pascalouma54@gmail.com' 
-                to_email = [purchase_order.buyer.username.email]
-
-                send_mail(subject, message, from_email, to_email, fail_silently=False)
-                logger.info("Email sent successfully")
-
-                return Response({'message': buyer_message, 'purchase_order': serializer.data}, status=status.HTTP_200_OK)
-            else:
-                return Response({'message': 'This purchase order is already under review.'}, status=status.HTTP_400_BAD_REQUEST)
-        except PurchaseOrder.DoesNotExist:
-            return Response({'message': 'Purchase Order not found.'}, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
-            logger.error(f"An error occurred: {e}")
-            return Response({'message': 'Internal Server Error.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            print(f"Error uploading letter of credit document: {e}")
+            return Response({'error': 'Error uploading letter of credit document'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+    def send_lc_upload_notification(self, letter_of_credit):
+        if letter_of_credit.buyer:
+            buyer_email = letter_of_credit.buyer.username.email
+
+            # Send email to the buyer
+            buyer_subject = 'Letter of Credit Document Uploaded - Processing'
+            buyer_message = render_to_string('email_templates/lc_upload_notification_buyer.html', {'letter_of_credit': letter_of_credit})
+            self.send_email_notification(buyer_email, buyer_subject, buyer_message)
+
+        # You can also send an email to the bank if needed
+        if letter_of_credit.bank_email:
+            bank_subject = 'Letter of Credit Document Uploaded - Processing'
+            bank_message = render_to_string('email_templates/lc_upload_notification_bank.html', {'letter_of_credit': letter_of_credit})
+            self.send_email_notification(letter_of_credit.bank_email, bank_subject, bank_message)
+
+    @action(detail=True, methods=['post'])
+    def notify_lc_received(self, request, pk=None):
+        letter_of_credit = self.get_object()
+
+        # Check if the letter of credit has an associated invoice
+        if letter_of_credit.invoice:
+            invoice = letter_of_credit.invoice
+
+            # Check if the invoice has a buyer associated with it
+            if invoice.buyer:
+                buyer_email = invoice.buyer.username.email
+
+                # Send email to the buyer
+                buyer_subject = 'Letter of Credit Received - Processing'
+                buyer_message = render_to_string('email_templates/lc_received_notification_buyer.html', {'invoice': invoice})
+                self.send_email_notification(buyer_email, buyer_subject, buyer_message)
+
+            # You can also send an email to the bank if needed
+            if invoice.bank_email:
+                bank_subject = 'Letter of Credit Received - Processing'
+                bank_message = render_to_string('email_templates/lc_received_notification_bank.html', {'invoice': invoice})
+                self.send_email_notification(invoice.bank_email, bank_subject, bank_message)
+
+        return Response({'message': 'Email notifications sent successfully.'}, status=status.HTTP_200_OK)
+
+def download_invoice_document(request, invoice_id):
+    invoice = get_object_or_404(Invoice, id=invoice_id)
+    file_path = invoice.invoice_document.path  # Assuming invoice_document is the FileField    with open(file_path, 'rb') as file:
+    response = HttpResponse(file.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename={invoice.invoice_document.name}'
+    return response
+        
+def download_lc_document(request, lc_id):
+    lc = get_object_or_404(LetterOfCredit, id=lc_id)
+    file_path = lc.lc_document.path  # Assuming lc_document is the FileField    with open(file_path, 'rb') as file:
+    response = HttpResponse(file.read(), content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename={lc.lc_document.name}'
+    return response

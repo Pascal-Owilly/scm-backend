@@ -13,7 +13,13 @@ from inventory_management.views import InventoryBreedViewSet, InventoryBreedSale
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
 from mpesa_payments.views import MpesaPaymentView
-from invoice_generator.views import InvoiceViewSet, BuyerViewSet, NotifyBuyerView, ProductViewSet, ItemViewSet, PurchaseOrderViewSet
+from invoice_generator.views import (
+    BuyerViewSet,
+    InvoiceViewSet,
+    LetterOfCreditViewSet,
+    download_invoice_document,
+    download_lc_document,
+)
 from slaughter_house.views import supply_vs_demand_statistics
 from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet
 
@@ -64,7 +70,18 @@ from custom_registration.views import (
 from payments.views import make_payment
 
 router = DefaultRouter()
-app_name = 'payments'
+# app_name = 'payments'
+app_name = 'invoice_generator'
+
+buyer_list = BuyerViewSet.as_view({'get': 'list'})
+buyer_detail = BuyerViewSet.as_view({'get': 'retrieve'})
+
+invoice_list = InvoiceViewSet.as_view({'get': 'list', 'post': 'create'})
+invoice_detail = InvoiceViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})
+
+lc_list = LetterOfCreditViewSet.as_view({'get': 'list', 'post': 'create'})
+lc_detail = LetterOfCreditViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})
+
 
 # router.register(r'profile', ProfileViewset)
 
@@ -115,9 +132,9 @@ router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')
 
 # Purchase order
 
-router.register(r'products', ProductViewSet, basename='product')
-router.register(r'items', ItemViewSet, basename='item')
-router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchaseorder')
+# router.register(r'products', ProductViewSet, basename='product')
+# router.register(r'items', ItemViewSet, basename='item')
+# router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchaseorder')
 
 
 
@@ -174,11 +191,23 @@ urlpatterns = [
     path('api/logistics-status/<int:invoice_id>/', LogisticsStatusViewSet.as_view({'get': 'retrieve'}), name='logistics-status-detail'),
 
     # Notify buyer
-    path('api/notify_buyer/<int:purchase_order_id>/', NotifyBuyerView.as_view(), name='notify_buyer'),
+    # path('api/notify_buyer/<int:purchase_order_id>/', NotifyBuyerView.as_view(), name='notify_buyer'),
 
     #  create purchase order
     # path('api/create-purchase-order/', create_purchase_order, name='create_purchase_order'),
 
+    # LC
+     # Download LC AND Invoice
+    path('api/buyers/', buyer_list, name='buyer-list'),
+    path('api/buyers/<int:pk>/', buyer_detail, name='buyer-detail'),
+    
+    path('api/invoices/', invoice_list, name='invoice-list'),
+    path('api/invoices/<int:pk>/', invoice_detail, name='invoice-detail'),
+    path('api/invoices/<int:invoice_id>/download/', download_invoice_document, name='download-invoice'),
+
+    path('api/letter_of_credits/', lc_list, name='lc-list'),
+    path('api/letter_of_credits/<int:pk>/', lc_detail, name='lc-detail'),
+    path('api/letter_of_credits/<int:lc_id>/download/', download_lc_document, name='download-lc'),
     # customer service viewset
 
     path('mpesa-payment/', MpesaPaymentView.as_view(), name = 'mpesa payments'),

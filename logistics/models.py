@@ -2,7 +2,7 @@
 from django.db import models
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from invoice_generator.models import Invoice
+from invoice_generator.models import Invoice, Buyer
 from custom_registration.models import CustomUser
 from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOICES
 
@@ -38,9 +38,21 @@ class LogisticsStatus(models.Model):
         ('received', 'Received'),
     ]
 
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
+
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES)
     timestamp = models.DateTimeField(auto_now_add=True)
+    is_status_updated = models.BooleanField(default=False)
+
+    @property
+    def is_arrived(self):
+        return self.status == 'arrived'
+
+    @property
+    def is_received(self):
+        return self.status == 'received'
+
 
     def __str__(self):
         return f'{self.status} - {self.invoice}'

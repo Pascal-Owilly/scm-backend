@@ -138,15 +138,15 @@ AUTH_USER_MODEL = 'custom_registration.CustomUser'
 # PASSWORD_RESET_CONFIRM_URL = 'password_reset_confirm'
 
 ROOT_URLCONF = 'scm.urls'
-# EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-# EMAIL_BACKEND = 'allauth.account.auth_backends.AuthenticationBackend'
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+EMAIL_BACKEND = 'allauth.account.auth_backends.AuthenticationBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # Use the appropriate port for your SMTP server
 EMAIL_USE_TLS = True  # Set to False if your server doesn't use TLS
 EMAIL_HOST_USER = 'pascalouma54@gmail.com'  # Your email address
 EMAIL_HOST_PASSWORD = 'jcfgolmahddantnv'
-# EMAIL_USE_SSL = True 
+# EMAIL_USE_SSL = False
 
 # send emais using OAuth
 

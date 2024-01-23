@@ -11,7 +11,7 @@ from custom_registration.models import BankTeller, CustomerService
 from django.template.loader import render_to_string  # Add this import
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
-
+from rest_framework.permissions import IsAuthenticated
 
 
 class AbattoirViewSet(viewsets.ModelViewSet):
@@ -23,6 +23,15 @@ class BreaderViewSet(viewsets.ModelViewSet):
     serializer_class = BreaderSerializer
 
 logger = logging.getLogger(__name__)
+
+class UserSuppliedBreedsViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = BreaderTrade.objects.all()
+    serializer_class = BreaderTradeSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        # Filter the queryset to show only breeds supplied by the logged-in user
+        return BreaderTrade.objects.filter(breeder=self.request.user)
 
 class BreaderTradeViewSet(viewsets.ModelViewSet):
 

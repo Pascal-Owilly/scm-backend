@@ -129,7 +129,9 @@ class CustomUser(AbstractUser):
 
 
     def __str__(self):
-        return f'{self.first_name} {self.last_name}'
+            return f'{self.first_name} {self.last_name} - {self.username}'
+
+        
 
 class PasswordReset(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)

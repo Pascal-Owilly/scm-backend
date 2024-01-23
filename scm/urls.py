@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 # from accounts.views import Profile, ProfileViewset
 # from accounts import views
-from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView
+from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView, UserSuppliedBreedsViewSet
 from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
@@ -21,7 +21,7 @@ from invoice_generator.views import (
     download_lc_document,
 )
 from slaughter_house.views import supply_vs_demand_statistics
-from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet
+from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet
 
 
 from dj_rest_auth.registration.views import (
@@ -95,6 +95,10 @@ router.register(r'breader-trade', BreaderTradeViewSet)
 router.register(r'breeder_totals', BreederTotalViewSet, basename='cut_totals')
 router.register(r'part_totals_count', BreedCutTotalViewSet, basename='breeder_totals')
 
+# breeder single user
+router.register(r'user-supplied-breeds', UserSuppliedBreedsViewSet, basename='user-supplied-breeds')
+
+
 # Inventory management
 
 router.register(r'abattoirs', AbattoirViewSet)
@@ -126,6 +130,8 @@ router.register(r'customer-service', CustomerServiceViewSet, basename='customer-
 
 # Logistics management
 router.register(r'logistics-status', LogisticsStatusViewSet, basename='logistics')
+router.register(r'all-logistics-statuses', LogisticsStatusAllViewSet, basename='all-logistics-statuses')
+
 router.register(r'order', OrderViewSet, basename='order')
 router.register(r'shipment-progress', ShipmentProgressViewSet, basename='shipment-progress')
 router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')

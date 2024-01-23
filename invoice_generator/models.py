@@ -8,28 +8,29 @@ from django.utils import timezone
 from datetime import timedelta
 
 class Buyer(models.Model):
-    username = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     address = models.TextField(null=True, blank=True)  # New field for address
-    buyer_email = models.EmailField(editable=False, null=True, blank=True)
-    buyer_first_name = models.CharField(max_length=255, editable=False, null=True, blank=True)
-    buyer_last_name = models.CharField(max_length=255, editable=False, null=True, blank=True)
-    buyer_country = models.CharField(max_length=255, editable=False, null=True, blank=True)
-    buyer_phone = models.CharField(max_length=20, editable=False, null=True, blank=True)
-
+    buyer_email = models.EmailField(editable=True, null=True, blank=True)
+    buyer_first_name = models.CharField(max_length=255, editable=True, null=True, blank=True)
+    buyer_last_name = models.CharField(max_length=255, editable=True, null=True, blank=True)
+    buyer_country = models.CharField(max_length=255, editable=True, null=True, blank=True)
+    buyer_phone = models.CharField(max_length=20, editable=True, null=True, blank=True)
     def __str__(self):
-        return f'{self.username}'
+        return f'{self.buyer}'
 
 class LetterOfCredit(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('received', 'Received'),
+
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
 
-    buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
     issue_date = models.DateTimeField(auto_now_add=True)
     expiry_date = models.DateField(auto_now_add=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='pending')
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='received')
 
     # File field for storing uploaded documents
     lc_document = models.FileField(upload_to='lc_documents/', null=True, blank=True)
@@ -71,10 +72,10 @@ class Invoice(models.Model):
     invoice_date = models.DateField(auto_now_add=True)
     due_date = models.DateField(editable=False, null=True, blank=True)
 
-    buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
     
     # File field for storing uploaded documents
-    attached_lc_document = models.FileField(upload_to='invoice_documents/', null=True, blank=True)
+    attached_lc_document = models.FileField(upload_to='invoice_documents/', null=False, blank=False)
     
     # Add a SlugField for the invoice number
     invoice_number = models.SlugField(max_length=50, unique=True, editable=False)
@@ -97,3 +98,6 @@ def pre_save_invoice(sender, instance, **kwargs):
 
     # Calculate due date as 30 days from the invoice date
     instance.due_date = instance.invoice_date + timedelta(days=30)
+
+    # Calculate total price based on quantity and unit price
+    instance.total_price = instance.quantity * instance.unit_price

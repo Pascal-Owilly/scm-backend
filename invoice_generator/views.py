@@ -31,6 +31,15 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     serializer_class = InvoiceSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        print(f"User: {self.request.user}")
+
+        # Retrieve the corresponding Buyer instance based on the user
+        buyer = get_object_or_404(Buyer, buyer=self.request.user)
+
+        # Filter invoices based on the retrieved Buyer instance
+        return Invoice.objects.filter(buyer=buyer)
+
     def perform_create(self, serializer):
         try:
             # Check if a buyer is associated with the invoice
@@ -38,10 +47,10 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
             if buyer_data:
                 # If a buyer is provided, create or retrieve the buyer
-                user, created = CustomUser.objects.get_or_create(**buyer_data)
+                buyer, created = Invoice.objects.get_or_create(**buyer_data)
 
                 # Update the serializer's buyer field with the CustomUser instance
-                serializer.validated_data['buyer'] = user  # Use the newly created or retrieved buyer
+                serializer.validated_data['buyer'] = buyer  # Use the newly created or retrieved buyer
 
             # Calculate the total price before saving the object
             serializer.validated_data['total_price'] = (
@@ -56,14 +65,19 @@ class InvoiceViewSet(viewsets.ModelViewSet):
     
 
 class LetterOfCreditViewSet(viewsets.ModelViewSet):
-    queryset = LetterOfCredit.objects.all()
+    queryset = LetterOfCredit.objects.all().order_by('-issue_date')
     serializer_class = LetterOfCreditSerializer
     permission_classes = [IsAuthenticated]
     # lookup_field = 'pk'  # Ensure this line is present
 
     def get_queryset(self):
-        # Filter letter of credits based on the logged-in user
-        return LetterOfCredit.objects.filter(buyer=self.request.user)
+        print(f"User: {self.request.user}")
+
+        # Retrieve the corresponding Buyer instance based on the user
+        buyer = get_object_or_404(Buyer, buyer=self.request.user)
+
+        # Filter invoices based on the retrieved Buyer instance
+        return LetterOfCredit.objects.filter(buyer=buyer)
 
     def send_email_notification(self, recipient_email, subject, message):
         send_mail(
@@ -79,14 +93,14 @@ class LetterOfCreditViewSet(viewsets.ModelViewSet):
     def upload_lc_document(self, request, *args, **kwargs):
         try:
             # Retrieve the currently logged-in user
-            user = request.user
+            buyer = self.request.user  # Change this line
 
-            user = request.user
-            print(f"User: {user}")
+            buyer = request.buyer
+            print(f"User: {buyer}")
 
 
             # Create the Letter of Credit
-            letter_of_credit = LetterOfCredit.objects.create(user=user, status='pending')
+            letter_of_credit = LetterOfCredit.objects.create(buyer=buyer, status='received')
 
             # Handle LC document upload
             lc_document = request.FILES.get('lc_document')

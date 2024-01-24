@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import json
 from custom_registration.custom_email_backend import OAuthEmailBackend
 
-
+import dj_database_url
 # Load environment variables from .env
 load_dotenv()
 
@@ -283,6 +283,10 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+
+DATABASES["default"] = dj_database_url.parse("postgres://scm_hxp4_user:XVYlpiSofsxlM9hYbi9uSABhgm0H8Zsg@dpg-cmodpt6d3nmc739kni6g-a.oregon-postgres.render.com/scm_hxp4")
+
+
 
 # AUTHENTICATION_BACKENDS = (
 #     # ...

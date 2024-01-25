@@ -123,8 +123,6 @@ MPESA_PASSKEY = config('mpesa_pass_key')
 MPESA_INITIATOR_USERNAME = config('initator_user_name')
 MPESA_INITIATOR_SECURITY_CREDENTIAL = 'Safaricom999!*!'
 
-
-
 # SWAGGER_SETTINGS = {
 #     'LOGIN_URL': 'rest_framework:login',
 #     'LOGOUT_URL': 'rest_framework:logout',
@@ -149,52 +147,6 @@ EMAIL_HOST_PASSWORD = 'txqerssmxheiyruz'
 # EMAIL_HOST_USER = 'pascalouma54@gmail.com'  # Your email address
 # EMAIL_HOST_PASSWORD = 'jcfgolmahddantnv'
 # EMAIL_USE_SSL = False
-
-# send emais using OAuth
-
-# # Load credentials from the 'credentials.json' file
-# with open('custom_registration/credentials.json') as f:
-#     credentials = json.load(f)
-
-# # Extract Google credentials
-# GOOGLE_CLIENT_ID = credentials['google']['client_id']
-# GOOGLE_CLIENT_SECRET = credentials['google']['client_secret']
-
-# Use the extracted credentials in your Django settings
-# SOCIALACCOUNT_PROVIDERS = {
-#     'google': {
-#         'APP': {
-#             'client_id': GOOGLE_CLIENT_ID,
-#             'secret': GOOGLE_CLIENT_SECRET,
-#             'key': '',
-#         }
-#     }
-# }
-
-# EMAIL_BACKEND = 'custom_registration.custom_email_backend.OAuthEmailBackend'
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = 'pascalouma54@gmail.com'  # Use your Gmail address
-
-# # Set EMAIL_HOST_PASSWORD to 'oauth2' to indicate that OAuth 2.0 will be used
-# EMAIL_HOST_PASSWORD = 'jcfgolmahddantnv'
-
-
-
-# from django.contrib.sites.models import Site
-# from allauth.socialaccount.models import SocialApp
-
-# site = Site.objects.get_current()
-# google_app = SocialApp.objects.create(
-#     provider='google',
-#     name='Google',
-#     client_id='your_google_client_id',
-#     secret='your_google_client_secret',
-# )
-
-# google_app.sites.add(site)
-# end gmail
 
 ACCOUNT_EMAIL_REQUIRED = True
 EMAIL_CONFIRM_REDIRECT_BASE_URL = \
@@ -254,6 +206,27 @@ REST_FRAMEWORK = {
     # # ...
 }
 
+# AWS settings
+AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+
+# Configure S3 for serving static files.
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+STATIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/static/'
+
+# Configure S3 for serving media files.
+AWS_S3_PUBLIC_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+MEDIA_URL = f'{AWS_S3_PUBLIC_URL}/uploads/'
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Use the default storage for media files.
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# Set the media URL to the S3 public URL.
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/media/'
+
 # REST_FRAMEWORK = {
 #     'DEFAULT_PERMISSION_CLASSES': [
 #     'rest_framework.permissions.IsAuthenticated',
@@ -273,20 +246,26 @@ REST_FRAMEWORK = {
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'supplies',
+#         'USER': 'pascal',
+#         'PASSWORD': 'test',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'supplies',
-        'USER': 'pascal',
-        'PASSWORD': 'test',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
 
-DATABASES["default"] = dj_database_url.parse("postgres://scm_hxp4_user:XVYlpiSofsxlM9hYbi9uSABhgm0H8Zsg@dpg-cmodpt6d3nmc739kni6g-a.oregon-postgres.render.com/scm_hxp4")
 
-
+# DATABASES["default"] = dj_database_url.parse("postgres://scm_hxp4_user:XVYlpiSofsxlM9hYbi9uSABhgm0H8Zsg@dpg-cmodpt6d3nmc739kni6g-a.oregon-postgres.render.com/scm_hxp4")
 
 # AUTHENTICATION_BACKENDS = (
 #     # ...
@@ -350,7 +329,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles_build', 'static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # Directory where uploaded media is saved.
 
-MEDIA_URL = '/media/' # Public URL at the browser
+# MEDIA_URL = '/media/' # Public URL at the browser
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field

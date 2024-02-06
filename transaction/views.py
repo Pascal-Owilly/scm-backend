@@ -13,6 +13,7 @@ from django.utils.html import strip_tags
 from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
 
+from rest_framework import permissions
 
 class AbattoirViewSet(viewsets.ModelViewSet):
     queryset = Abattoir.objects.all()
@@ -78,6 +79,61 @@ class BreaderTradeViewSet(viewsets.ModelViewSet):
         return Response({'total_quantity_by_breed': total_quantity_by_breed})
         print(total_quantity_by_breed)
 
+# ------------Breadder trade single user------
+
+class BreaderTradeSingleUserViewSet(viewsets.ModelViewSet):
+    queryset = BreaderTrade.objects.all().order_by('-created_at')
+    serializer_class = BreaderTradeSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        # Get the current user
+        current_user = request.user
+
+        # Check if the current user has any supplies
+        user_supplies = BreaderTrade.objects.filter(breeder=current_user)
+
+        if user_supplies.exists():
+            # If the user has supplies, serialize and return them
+            serializer = self.get_serializer(user_supplies, many=True)
+            return Response(serializer.data)
+        else:
+            # If the user has not supplied any breeds, return a message
+            return Response({"message": "You have not supplied any breeds."})
+    
+    def perform_create(self, serializer):
+        # Set the breeder field of BreaderTrade to the currently authenticated user
+        serializer.save(breeder=self.request.user)
+
+    @action(detail=True, methods=['get'])
+    def breader_info(self, request, pk=None):
+        """
+        Retrieve detailed information about a specific BreaderTrade.
+
+        Example URL: /api/breader-trade/{pk}/breader-info/
+        """
+        try:
+            breeder_trade = self.get_object()
+            breeder_data = BreaderSerializer(breeder_trade.breeder).data
+            return Response(breeder_data)
+        except Exception as e:
+            # Log the exception
+            logger.error(f"Error in retrieving Breader information: {str(e)}")
+            # Print the error to the console during development
+            print(f"Error in retrieving Breader information: {str(e)}")
+            # Return a response indicating the error
+            return Response({"error": "An error occurred while retrieving Breader information."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+    @action(detail=False, methods=['get'])
+    def total_quantity(self, request):
+        total_quantity_by_breed = BreaderTrade.objects.values('breed').annotate(total_quantity=Sum('breads_supplied'))
+        return Response({'total_quantity_by_breed': total_quantity_by_breed})
+        print(total_quantity_by_breed)
+
+# ------------End Breadder trade single user------
+
+
+
 class BreaderCountView(APIView):
     def get(self, request, format=None):
         breader_count = Breader.objects.count()
@@ -114,9 +170,6 @@ class AbattoirPaymentToBreaderViewSet(viewsets.ModelViewSet):
 
         headers = self.get_success_headers(serializer.data)
         return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
-
-
-
 
     def list_payments(self, request, *args, **kwargs):
         # Retrieve all payments

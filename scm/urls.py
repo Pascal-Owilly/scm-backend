@@ -8,7 +8,7 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 # from accounts.views import Profile, ProfileViewset
 # from accounts import views
-from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView, UserSuppliedBreedsViewSet
+from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView, UserSuppliedBreedsViewSet, BreaderTradeSingleUserViewSet
 from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
@@ -92,6 +92,8 @@ router.register(r'inventory-breed-name', InventoryBreedViewSet)
 
 # Ready -breed and trade
 router.register(r'breader-trade', BreaderTradeViewSet)
+router.register(r'breader-trade-id', BreaderTradeSingleUserViewSet)
+
 router.register(r'breeder_totals', BreederTotalViewSet, basename='cut_totals')
 router.register(r'part_totals_count', BreedCutTotalViewSet, basename='breeder_totals')
 

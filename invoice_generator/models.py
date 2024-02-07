@@ -3,9 +3,185 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from django.utils.text import slugify
 from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOICES
-from custom_registration.models import CustomUser
+from custom_registration.models import CustomUser, Bank
 from django.utils import timezone
 from datetime import timedelta
+from transaction.models import Abattoir, Breader
+
+# ---------------Seller Purchase order--------------------------------------------
+
+class PurchaseOrder(models.Model):
+    
+    # Header Information
+    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    po_number = models.CharField(max_length=100, unique=True)
+    date = models.DateField(auto_now_add=True)
+    trader_name = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    buyer_address = models.TextField()
+    buyer_contact = models.CharField(max_length=100)
+    seller_address = models.TextField()
+    seller_contact = models.CharField(max_length=100)
+    shipping_address = models.TextField()
+    confirmed = models.BooleanField(default=False)
+    
+    # Line Items
+    product_description = models.TextField()
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    tax = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Terms and Conditions
+    payment_terms = models.CharField(max_length=255)
+    delivery_terms = models.CharField(max_length=255)
+
+    # Additional Information
+    reference_numbers = models.CharField(max_length=255)
+    special_instructions = models.TextField()
+    attachments = models.FileField(upload_to='attachments/', blank=True, null=True)
+
+    # Approval and Signature
+    authorized_signature = models.CharField(max_length=255)
+    signature_date = models.DateField(auto_now_add=True)
+
+
+    def __str__(self):
+        return self.po_number
+
+    #-------------Seller LC------------------------------------------------
+
+class LetterOfCreditSellerToTrader(models.Model):
+    # Header Information
+
+     # Define choices for payment types
+    PAYMENT_TYPES = [
+        ('at_sight', 'Payment at Sight'),
+        ('deferred_payment', 'Deferred Payment'),
+    ]
+    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='at_sight')
+
+    # Terms and Conditions
+    # Define choices for shipment periods
+    SHIPMENT_PERIODS = [
+        ('immediate', 'Immediate'),
+        ('within_30_days', 'Within 30 Days'),
+        ('within_60_days', 'Within 60 Days'),
+        # Add more choices as needed
+    ]
+    shipment_period = models.CharField(max_length=20, choices=SHIPMENT_PERIODS, default='immediate')
+
+    # Define choices for documents required
+    DOCUMENTS_REQUIRED_CHOICES = [
+        ('invoice', 'Invoice'),
+        ('packing_list', 'Packing List'),
+        ('bill_of_lading', 'Bill of Lading'),
+        # Add more choices as needed
+    ]
+    documents_required = models.TextField(choices=DOCUMENTS_REQUIRED_CHOICES, default='bill_of_lading')
+
+    # Additional Information
+    # Define choices for reference types
+    REFERENCE_TYPES = [
+        ('order_number', 'Order Number'),
+        ('contract_number', 'Contract Number'),
+        ('other', 'Other'),
+    ]
+    reference_type = models.CharField(max_length=20, choices=REFERENCE_TYPES, default='order_number')
+
+    # Define choices for approval statuses
+    APPROVAL_STATUSES = [
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    ]
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUSES, default='pending')
+
+    # Define choices for tracking statuses
+    TRACKING_STATUSES = [
+        ('in_transit', 'In Transit'),
+        ('delivered', 'Delivered'),
+        ('delayed', 'Delayed'),
+    ]
+    tracking_status = models.CharField(max_length=20, choices=TRACKING_STATUSES, default='in_transit')
+
+    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
+    lc_number = models.CharField(max_length=100, unique=True)
+    date = models.DateField(auto_now_add=True)
+    beneficiary_name = models.CharField(max_length=255)
+    beneficiary_address = models.TextField()
+    issuing_bank_name = models.CharField(max_length=255)
+    issuing_bank_address = models.TextField()
+    advising_bank_name = models.CharField(max_length=255)
+    advising_bank_address = models.TextField()
+
+    # Terms and Conditions
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    expiry_date = models.DateField()
+    shipment_period = models.CharField(max_length=100)
+    documents_required = models.TextField()
+    special_conditions = models.TextField()
+
+    # Payment Information
+    payment_at_sight = models.BooleanField(default=False)
+    deferred_payment = models.BooleanField(default=False)
+    payment_terms = models.CharField(max_length=255)
+
+    # Additional Information
+    reference_numbers = models.CharField(max_length=255)
+    attachments = models.FileField(upload_to='lc_from_local_seller_to_local_trader/', blank=True, null=True)
+
+    # Approval and Signature
+    authorized_signature_issuing_bank = models.CharField(max_length=255)
+    authorized_signature_advising_bank = models.CharField(max_length=255)
+    signature_date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return self.lc_number
+        
+    #-------------End Seller LC--------------------------------------------
+
+# ---------------Profoma invoice from traser to seller
+
+class ProformaInvoiceFromTraderToSeller(models.Model):
+    # Header Information
+    invoice_number = models.CharField(max_length=100, unique=True)
+    date = models.DateField(auto_now_add=True)
+    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    buyer_address = models.TextField()
+    trader = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    seller_address = models.TextField()
+
+    # Line Items
+    product_description = models.TextField()
+    quantity = models.IntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Terms and Conditions
+    payment_terms = models.CharField(max_length=255)
+    delivery_terms = models.CharField(max_length=255)
+
+    # Additional Information
+    reference_numbers = models.CharField(max_length=255)
+    attachments = models.FileField(upload_to='invoices_from_local_traders_to_local_sellers/', blank=True, null=True)
+
+    # Approval and Signature
+    authorized_signature_buyer = models.CharField(max_length=255)
+    authorized_signature_seller = models.CharField(max_length=255)
+    signature_date = models.DateField(auto_now_add=True)
+
+    def __str__(self):
+        return f'Invoice #{self.invoice_number} for {self.seller.first_name} - {self.date}'
+
+#--------------------- End profoma-------------------------------------
+
+# ----------------End Seller-----------------------------------------------
+
+
+# ----------------Buyer----------------------------------------------------
 
 class Buyer(models.Model):
     buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
@@ -15,6 +191,7 @@ class Buyer(models.Model):
     buyer_last_name = models.CharField(max_length=255, editable=True, null=True, blank=True)
     buyer_country = models.CharField(max_length=255, editable=True, null=True, blank=True)
     buyer_phone = models.CharField(max_length=20, editable=True, null=True, blank=True)
+
     def __str__(self):
         return f'{self.buyer}'
 
@@ -22,7 +199,6 @@ class LetterOfCredit(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('received', 'Received'),
-
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
@@ -101,3 +277,6 @@ def pre_save_invoice(sender, instance, **kwargs):
 
     # Calculate total price based on quantity and unit price
     instance.total_price = instance.quantity * instance.unit_price
+
+# -------------------End Buyer---------------------------------------------------------------------------------
+

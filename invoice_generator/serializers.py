@@ -1,8 +1,25 @@
 from rest_framework import serializers
-from .models import Invoice, Buyer,LetterOfCredit
+from .models import Invoice, Buyer,LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller
 from custom_registration.models import CustomUser  
 from logistics.serializers import LogisticsStatusSerializer, LogisticsStatus
 
+
+# Local Buyers and sellers
+
+class PurchaseOrderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = PurchaseOrder
+        fields = '__all__'
+
+class LetterOfCreditSellerToTraderSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LetterOfCreditSellerToTrader
+        fields = '__all__'
+
+class ProformaInvoiceFromTraderToSellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProformaInvoiceFromTraderToSeller
+        fields = '__all__'
 
 class BuyerSerializer(serializers.ModelSerializer):
     class Meta:
@@ -50,3 +67,4 @@ class LogisticsStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = LogisticsStatus
         fields = ['id', 'status', 'timestamp', 'invoice']
+

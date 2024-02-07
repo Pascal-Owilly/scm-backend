@@ -8,7 +8,16 @@ from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter
 # from accounts.views import Profile, ProfileViewset
 # from accounts import views
-from transaction.views import AbattoirViewSet, BreaderViewSet, BreaderTradeViewSet, AbattoirPaymentToBreaderViewSet, BreaderCountView, UserSuppliedBreedsViewSet, BreaderTradeSingleUserViewSet
+from transaction.views import (
+    AbattoirPaymentToBreaderViewSet,
+    BreaderViewSet,
+     AbattoirViewSet, 
+     BreaderViewSet,
+      BreaderTradeViewSet,
+       AbattoirPaymentToBreaderViewSet,
+       BreaderCountView, UserSuppliedBreedsViewSet,
+        BreaderTradeSingleUserViewSet
+)
 from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
 # from accounts.views import get_csrf_token
@@ -19,6 +28,9 @@ from invoice_generator.views import (
     LetterOfCreditViewSet,
     download_invoice_document,
     download_lc_document,
+    PurchaseOrderViewSet,
+    LetterOfCreditSellerToTraderViewSet,
+    ProformaInvoiceFromTraderToSellerViewSet,
 )
 from slaughter_house.views import supply_vs_demand_statistics
 from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet
@@ -48,7 +60,6 @@ from allauth.account.views import (
 #     GetUserRole,
 # )
 
-from transaction.views import AbattoirPaymentToBreaderViewSet
 
 from custom_registration.views import (
     CustomTokenObtainPairView,
@@ -63,7 +74,7 @@ from custom_registration.views import (
     RoleListView,
     PaymentViewSet, CustomerServiceViewSet,
     PasswordResetRequestView,
-    PasswordResetConfirmView
+    PasswordResetConfirmView,
 )
 
 # Payments
@@ -83,7 +94,16 @@ lc_list = LetterOfCreditViewSet.as_view({'get': 'list', 'post': 'create'})
 lc_detail = LetterOfCreditViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})
 
 
-# router.register(r'profile', ProfileViewset)
+# Breeders
+router.register(r'traders', BreaderViewSet)
+
+# Purchase order and Lc Local. Profoma invoice
+router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
+router.register(r'letters-of-credit-to-local-traders', LetterOfCreditSellerToTraderViewSet, basename='letters-of-credit-to-local-traders')
+router.register(r'profoma-invoice-to-local-sellers', ProformaInvoiceFromTraderToSellerViewSet, basename='profoma-invoice-to-local-sellers')
+
+    # router.register(r'profile', ProfileViewset)
+
 
 # breed sales from transaction
 router.register(r'inventory-breed-sales', InventoryBreedSalesViewSet)
@@ -167,6 +187,10 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+
+    # new purchase order
+
+
 
     # custom registration
 

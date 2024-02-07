@@ -14,6 +14,8 @@ from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
 
 from rest_framework import permissions
+from django.utils.html import strip_tags
+
 
 class AbattoirViewSet(viewsets.ModelViewSet):
     queryset = Abattoir.objects.all()

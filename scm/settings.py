@@ -139,7 +139,7 @@ ROOT_URLCONF = 'scm.urls'
 
 # EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-# EMAIL_BACKEND = 'allauth.account.auth_backends.AuthenticationBackend'
+# # EMAIL_BACKEND = 'allauth.account.auth_backends.AuthenticationBackend'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587  # Use the appropriate port for your SMTP server

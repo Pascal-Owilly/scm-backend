@@ -31,6 +31,8 @@ from invoice_generator.views import (
     PurchaseOrderViewSet,
     LetterOfCreditSellerToTraderViewSet,
     ProformaInvoiceFromTraderToSellerViewSet,
+    QuotationViewSet,
+
 )
 from slaughter_house.views import supply_vs_demand_statistics
 from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet
@@ -75,10 +77,14 @@ from custom_registration.views import (
     PaymentViewSet, CustomerServiceViewSet,
     PasswordResetRequestView,
     PasswordResetConfirmView,
+    SellerViewSet
 )
+
+from custom_registration import views
 
 # Payments
 from payments.views import make_payment
+
 
 router = DefaultRouter()
 # app_name = 'payments'
@@ -142,6 +148,15 @@ router.register(r'register', CustomUserRegistrationViewSet, basename='register')
 router.register(r'logout', CustomLogoutViewSet, basename='logout')
 router.register(r'profiles', UserProfileViewSet, basename='profile')
 
+# sellers
+router.register(r'sellers', SellerViewSet, basename='sellers')
+
+
+# Buyer
+router.register(r'register-buyer', CustomUserRegistrationViewSet, basename='register-buyer')
+router.register(r'send-quotation', QuotationViewSet, basename='send-quotation')
+
+
 # Payments
 
 # router.register(r'payments-to-breeder', PaymentViewSet, basename='payment_to_breeder')
@@ -190,7 +205,7 @@ urlpatterns = [
 
     # new purchase order
 
-
+    
 
     # custom registration
 

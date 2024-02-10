@@ -9,7 +9,6 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
-
 class Status(models.Model):
     is_dormant = models.BooleanField()  
     status_title = models.CharField(max_length=100)
@@ -90,6 +89,7 @@ class CustomUser(AbstractUser):
     BREEDER = 'breeder'
     REGULAR = 'regular'
     BUYER = 'buyer'
+    SELLER = 'seller'
     WAREHOUSE_PERSONNEL = 'warehouse_personnel'
     INVENTORY_MANAGER = 'inventory_manager'
     ADMIN = 'admin'
@@ -104,6 +104,7 @@ class CustomUser(AbstractUser):
         (BREEDER, 'Breeder'),
         (REGULAR, 'regular'),
         (BUYER, 'Buyer'),
+        (SELLER, 'Seller'),
         (WAREHOUSE_PERSONNEL, 'Warehouse Personnel'),
         (INVENTORY_MANAGER, 'Inventory Manager'),
         (ADMIN, 'Admin'),
@@ -124,13 +125,15 @@ class CustomUser(AbstractUser):
     community = models.CharField(max_length=100, null=True, blank=True)
     head_of_family = models.CharField(max_length=255,default='Example Name', null=True, blank=True)
     county = models.CharField(max_length=50, null=True, blank=True)
+    country = models.CharField(max_length=50, null=True, blank=True)  
+    address = models.TextField(null=True, blank=True)  # New field for address
+    
     groups = models.ManyToManyField(Group, related_name='users', blank=True)
 
 
 
     def __str__(self):
             return f'{self.first_name} {self.last_name} - {self.username}'
-
         
 
 class PasswordReset(models.Model):
@@ -155,6 +158,15 @@ class CustomerService(models.Model):
     def __str__(self):
         return f"{self.user.first_name} {self.user.last_name}"
 
+class Seller(models.Model):
+    seller = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
+    def get_full_name(self):
+        return f'{self.seller.first_name} {self.seller.last_name} '
+
+    def __str__(self):
+        return f'{self.seller.username}'
 
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)

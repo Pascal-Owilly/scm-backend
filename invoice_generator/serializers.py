@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Invoice, Buyer,LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller
+from .models import Invoice, Buyer,LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller, Quotation
 from custom_registration.models import CustomUser  
 from logistics.serializers import LogisticsStatusSerializer, LogisticsStatus
 
@@ -22,9 +22,11 @@ class ProformaInvoiceFromTraderToSellerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BuyerSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source='get_full_name', read_only=True)
+
     class Meta:
         model = Buyer
-        fields = '__all__'
+        fields = ['id', 'buyer', 'full_name']  # Include other fields as needed
 
 class InvoiceSerializer(serializers.ModelSerializer):
     buyer = BuyerSerializer(required=False)
@@ -67,4 +69,11 @@ class LogisticsStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = LogisticsStatus
         fields = ['id', 'status', 'timestamp', 'invoice']
+
+# Buyer and quotatuin
+
+class QuotationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Quotation
+        fields = '__all__'
 

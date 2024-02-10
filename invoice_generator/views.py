@@ -13,12 +13,12 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, status
-from .models import Invoice, Buyer, LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller
+from .models import Invoice, Buyer, LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller, Quotation
 from logistics.models import LogisticsStatus
-from .serializers import InvoiceSerializer, BuyerSerializer, LetterOfCreditSerializer, LetterOfCreditSellerToTraderSerializer, PurchaseOrderSerializer, ProformaInvoiceFromTraderToSellerSerializer
+from .serializers import InvoiceSerializer, BuyerSerializer, LetterOfCreditSerializer, LetterOfCreditSellerToTraderSerializer, PurchaseOrderSerializer, ProformaInvoiceFromTraderToSellerSerializer, QuotationSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from custom_registration.models import CustomUser
+from custom_registration.models import CustomUser, Seller 
 from rest_framework.decorators import action
 from .notifications import send_lc_to_the_bank_and_po_to_breeder
 from django.core.mail import send_mail
@@ -30,7 +30,9 @@ from django.views.generic import View
 
 from django.utils.html import strip_tags
 
-# new  po
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
     queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderSerializer
@@ -41,7 +43,8 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
-        # Send email notification to the sender
+        # Send email notification to all traders associated with the abattoir
+         # Send email notification to the sender
         if serializer.validated_data.get('confirmed', False):
             subject = 'Purchase Order Confirmation'
             sender_email = 'pascalouma54@gmail.com'  # Assuming seller has an email field
@@ -57,62 +60,61 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
 
         return Response(serializer.data)
 
-# endnew
-
-
-
 class LetterOfCreditSellerToTraderViewSet(viewsets.ModelViewSet):
     queryset = LetterOfCreditSellerToTrader.objects.all()
     serializer_class = LetterOfCreditSellerToTraderSerializer
-
-    def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        serializer.save(sender=request.user)  # Set the sender to the current user
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        self.perform_update(serializer)
+
+         # Send email notification to the sender
+        if serializer.validated_data.get('confirmed', False):
+            subject = 'Letter of credit'
+            sender_email = 'pascalouma54@gmail.com'  # Assuming seller has an email field
+            receiver_email = instance.trader_name.user.email  # Assuming trader_name is a ForeignKey to a model with an email field
+
+            # Render email template
+            email_context = {'purchase_order': instance}
+            email_body = render_to_string('po_and_breeder_trade_confirmation_email_template.html', email_context)
+
+            # Send email
+            plain_email_body = strip_tags(email_body)  # Strip HTML tags for the plain message
+            send_mail(subject, plain_email_body, settings.DEFAULT_FROM_EMAIL, [sender_email, receiver_email], html_message=email_body)
+
         return Response(serializer.data)
 
-    def approve(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.status = 'approved'
-        instance.save()
-        return Response({'status': 'approved'}, status=status.HTTP_200_OK)
-
-    def reject(self, request, *args, **kwargs):
-        instance = self.get_object()
-        instance.status = 'rejected'
-        instance.save()
-        return Response({'status': 'rejected'}, status=status.HTTP_200_OK)
-
-    def send_to_bank(self, request, *args, **kwargs):
-        instance = self.get_object()
-        # Add logic to send LC to bank
-        # For example: instance.status = 'sent_to_bank'
-        instance.save()
-
-        # Trigger notification to trader
-        trader = instance.trader_name  # Assuming breeder is the trader
-        send_lc_to_the_bank_and_po_to_breeder(trader)
-
-        return Response({'status': 'sent_to_bank'}, status=status.HTTP_200_OK)
-
-    def get_actions(self):
-        actions = super().get_actions()
-        actions['send_to_bank'] = {'method': 'post'}
-        return actions
 
 class ProformaInvoiceFromTraderToSellerViewSet(viewsets.ModelViewSet):
     queryset = ProformaInvoiceFromTraderToSeller.objects.all()
-    serializer_class =ProformaInvoiceFromTraderToSellerSerializer
+    serializer_class = ProformaInvoiceFromTraderToSellerSerializer
+
+    def update(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+         # Send email notification to the sender
+        if serializer.validated_data.get('confirmed', False):
+            subject = 'Purchase Order Confirmation'
+            sender_email = 'pascalouma54@gmail.com'  # Assuming seller has an email field
+            receiver_email = instance.trader_name.user.email  # Assuming trader_name is a ForeignKey to a model with an email field
+
+            # Render email template
+            email_context = {'purchase_order': instance}
+            email_body = render_to_string('po_and_breeder_trade_confirmation_email_template.html', email_context)
+
+            # Send email
+            plain_email_body = strip_tags(email_body)  # Strip HTML tags for the plain message
+            send_mail(subject, plain_email_body, settings.DEFAULT_FROM_EMAIL, [sender_email, receiver_email], html_message=email_body)
+
+        return Response(serializer.data)
 
 class BuyerViewSet(viewsets.ModelViewSet):
-    queryset = Buyer.objects.all()
+    queryset = Buyer.objects.all().order_by('-created_at')
     serializer_class = BuyerSerializer
 
 class InvoiceViewSet(viewsets.ModelViewSet):
@@ -150,6 +152,52 @@ class InvoiceViewSet(viewsets.ModelViewSet):
         except Exception as e:
             print(f"Error in perform_create: {e}")
             raise
+
+# Buyer and quotation
+
+class QuotationViewSet(viewsets.ModelViewSet):
+    queryset = Quotation.objects.all()
+    serializer_class = QuotationSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+
+        # Retrieve the corresponding Buyer instance based on the user
+        buyer = get_object_or_404(Buyer, buyer=self.request.user)
+
+        # Filter invoices based on the retrieved Buyer instance
+        return Quotation.objects.filter(buyer=buyer)
+        
+
+    def perform_update(self, serializer):
+        instance = serializer.save()
+
+        if instance.confirm:
+            seller_email = 'pascalouma54@gmail.com'  # Fixed sender's email address
+            subject = 'Quotation Confirmation'
+            
+            # Buyer's name
+            buyer_name = instance.buyer.buyer.get_full_name() if instance.buyer.buyer else 'Unknown Buyer'
+            buyer_email = instance.buyer.buyer.email
+            # Seller's name
+            seller_name = instance.seller.seller.get_full_name() if instance.seller else 'Unknown Seller'
+            
+            # Email context
+            context = {'buyer_name': buyer_name, 'seller_name': seller_name}
+            html_message = render_to_string('quotation_confirmation_email.html', context)
+            plain_message = strip_tags(html_message)
+
+            # Send email to the buyer from the fixed sender's email address
+            from_email = seller_email
+            buyer_email = buyer_email  # Replace with actual buyer's email
+            recipient_list = [buyer_email]
+            send_mail(subject, plain_message, from_email, recipient_list, html_message=html_message)
+            
+            # Update a field in the buyer's model (e.g., has_confirmed_quotation)
+            instance.buyer.has_confirmed_quotation = True
+            instance.buyer.save()
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class LetterOfCreditViewSet(viewsets.ModelViewSet):
     queryset = LetterOfCredit.objects.all().order_by('-issue_date')
@@ -256,3 +304,5 @@ def download_lc_document(request, lc_id):
     response = HttpResponse(file.read(), content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename={lc.lc_document.name}'
     return response
+
+   

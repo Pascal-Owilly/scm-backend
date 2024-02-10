@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quotation notifiction</title>
+
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px;
+            text-align: center;
+        }
+
+        h1 {
+            color: #3498db;
+        }
+
+        p {
+            font-size: 16px;
+            line-height: 1.6;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            background-color: #2ecc71;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Quotation confirmation</h1>
+    <p>Dear {{ seller_name }},</p>
+
+    <p>{{ buyer_name }} has confirmed your quotation.</p>
+    <p>We have notified them to send you purchase order for the same.</p>
+    <p>Thank you for your attention.</p>
+</body>
+</html>

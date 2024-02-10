@@ -1,6 +1,6 @@
 # serializers.py
 from rest_framework import serializers
-from .models import CustomUser, UserProfile, Payment, CustomerService
+from .models import CustomUser, UserProfile, Payment, CustomerService, Seller
 from rest_framework_simplejwt.tokens import RefreshToken
 from transaction.serializers import BreaderTradeSerializer
 from transaction.models import BreaderTrade
@@ -125,4 +125,11 @@ class CustomerServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomerService
         fields = '__all__'
+
+# sellers
+class SellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Seller
+        fields = '__all__'
+
 

@@ -7,7 +7,7 @@ from custom_registration.models import CustomUser, Bank
 from django.utils import timezone
 from datetime import timedelta
 from transaction.models import Abattoir, Breader
-
+from custom_registration.models import Seller
 # ---------------Seller Purchase order--------------------------------------------
 
 class PurchaseOrder(models.Model):
@@ -28,7 +28,6 @@ class PurchaseOrder(models.Model):
     product_description = models.TextField()
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2)
 
@@ -54,13 +53,7 @@ class PurchaseOrder(models.Model):
 class LetterOfCreditSellerToTrader(models.Model):
     # Header Information
 
-     # Define choices for payment types
-    PAYMENT_TYPES = [
-        ('at_sight', 'Payment at Sight'),
-        ('deferred_payment', 'Deferred Payment'),
-    ]
-    payment_type = models.CharField(max_length=20, choices=PAYMENT_TYPES, default='at_sight')
-
+   
     # Terms and Conditions
     # Define choices for shipment periods
     SHIPMENT_PERIODS = [
@@ -79,15 +72,6 @@ class LetterOfCreditSellerToTrader(models.Model):
         # Add more choices as needed
     ]
     documents_required = models.TextField(choices=DOCUMENTS_REQUIRED_CHOICES, default='bill_of_lading')
-
-    # Additional Information
-    # Define choices for reference types
-    REFERENCE_TYPES = [
-        ('order_number', 'Order Number'),
-        ('contract_number', 'Contract Number'),
-        ('other', 'Other'),
-    ]
-    reference_type = models.CharField(max_length=20, choices=REFERENCE_TYPES, default='order_number')
 
     # Define choices for approval statuses
     APPROVAL_STATUSES = [
@@ -168,10 +152,6 @@ class ProformaInvoiceFromTraderToSeller(models.Model):
     reference_numbers = models.CharField(max_length=255)
     attachments = models.FileField(upload_to='invoices_from_local_traders_to_local_sellers/', blank=True, null=True)
 
-    # Approval and Signature
-    authorized_signature_buyer = models.CharField(max_length=255)
-    authorized_signature_seller = models.CharField(max_length=255)
-    signature_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
         return f'Invoice #{self.invoice_number} for {self.seller.first_name} - {self.date}'
@@ -185,15 +165,12 @@ class ProformaInvoiceFromTraderToSeller(models.Model):
 
 class Buyer(models.Model):
     buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
-    address = models.TextField(null=True, blank=True)  # New field for address
-    buyer_email = models.EmailField(editable=True, null=True, blank=True)
-    buyer_first_name = models.CharField(max_length=255, editable=True, null=True, blank=True)
-    buyer_last_name = models.CharField(max_length=255, editable=True, null=True, blank=True)
-    buyer_country = models.CharField(max_length=255, editable=True, null=True, blank=True)
-    buyer_phone = models.CharField(max_length=20, editable=True, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    def get_full_name(self):
+        return f'{self.buyer.first_name} {self.buyer.last_name} - {self.buyer.username}'
 
     def __str__(self):
-        return f'{self.buyer}'
+        return f'{self.buyer.username}'
 
 class LetterOfCredit(models.Model):
     STATUS_CHOICES = [
@@ -280,3 +257,18 @@ def pre_save_invoice(sender, instance, **kwargs):
 
 # -------------------End Buyer---------------------------------------------------------------------------------
 
+# Buyer and quotation
+
+class Quotation(models.Model):
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    product = models.CharField(max_length=100)  # Updated field name
+    confirm = models.BooleanField(default=False)
+    quantity = models.PositiveIntegerField()  # Updated field name
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # Updated field name
+    message = models.TextField()  # Updated field name
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Quotation for {self.product} by {self.buyer}"

@@ -30,7 +30,7 @@ class Abattoir(models.Model):
 
 
 class BreaderTrade(models.Model):
-
+            
     PRODUCTS = []
 
     breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)

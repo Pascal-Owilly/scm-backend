@@ -8,11 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from django.shortcuts import get_object_or_404
+from rest_framework.decorators import api_view
 
-from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService
+from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService, Seller
 from rest_framework import status
 
-from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer, CustomerServiceSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer
+from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer, CustomerServiceSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, SellerSerializer
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.views import LogoutView
@@ -413,3 +414,44 @@ class PaymentViewSet(viewsets.ModelViewSet):
 class CustomerServiceViewSet(viewsets.ModelViewSet):
     queryset = CustomerService.objects.all()
     serializer_class = CustomerServiceSerializer
+
+# seller
+
+class SellerViewSet(viewsets.ModelViewSet):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
+
+    @action(detail=False, methods=['post'])
+    def send_quotation_and_message_to_buyer(self, request):
+        # Ensure all required data is provided in the request
+        required_fields = ['buyer_id', 'message', 'product', 'quantity', 'unit_price']
+        for field in required_fields:
+            if field not in request.data:
+                return Response({'error': f'Missing {field} in request data'}, status=status.HTTP_400_BAD_REQUEST)
+
+        buyer_id = request.data.get('buyer_id')
+        message = request.data.get('message')
+        product = request.data.get('product')
+        quantity = request.data.get('quantity')
+        unit_price = request.data.get('unit_price')
+
+        # Ensure the buyer exists and has the role 'BUYER'
+        buyer = get_object_or_404(CustomUser, id=buyer_id, role='BUYER')
+
+        # Create a new Quotation object
+        quotation_data = {
+            'buyer': buyer_id,  
+            'product': product,
+            'quantity': quantity,
+            'unit_price': unit_price
+        }
+        quotation_serializer = QuotationSerializer(data=quotation_data)
+        if quotation_serializer.is_valid():
+            quotation = quotation_serializer.save()
+        else:
+            return Response(quotation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        # Here you would implement the logic to send the message to the buyer
+        # For the sake of this example, let's assume the message is sent successfully
+        return Response({'message': f'Message and quotation sent to buyer {buyer_id}: {message}', 'quotation_id': quotation.id}, status=status.HTTP_200_OK)
+

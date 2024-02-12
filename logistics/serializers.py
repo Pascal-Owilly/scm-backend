@@ -1,6 +1,12 @@
 # logistics/serializers.py
 from rest_framework import serializers
-from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder
+from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo
+
+class PackageInfoSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PackageInfo
+        fields = '__all__'
 
 class LogisticsStatusSerializer(serializers.ModelSerializer):
     # Update the source to use 'id' instead of 'invoice.invoice_number'

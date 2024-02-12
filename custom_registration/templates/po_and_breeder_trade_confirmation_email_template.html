@@ -38,11 +38,16 @@
 
     {% if purchase_order.confirmed %}
         <p>Your purchase order ({{ purchase_order.po_number }}) has been confirmed successfully!</p>
+        <div class="success-message">
+            <p>Please proceed and send the letter of credit to bank.</p>
+
+        </div>
+
     {% else %}
         <p>Your purchase order ({{ purchase_order.po_number }}) has been declined.</p>
     {% endif %}
 
-    <p>Thank you for confirming the purchase order.</p>
+    <p>Thank you for your attention.</p>
 
     {% if success_message %}
         <p class="success-message">{{ success_message }}</p>

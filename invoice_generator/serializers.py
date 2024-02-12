@@ -71,9 +71,8 @@ class LogisticsStatusSerializer(serializers.ModelSerializer):
         fields = ['id', 'status', 'timestamp', 'invoice']
 
 # Buyer and quotatuin
-
 class QuotationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Quotation
-        fields = '__all__'
+        fields = ['id', 'seller', 'buyer', 'product', 'confirm', 'quantity', 'delivery_time', 'unit_price', 'message', 'created_at']
 

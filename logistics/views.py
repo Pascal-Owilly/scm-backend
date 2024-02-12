@@ -1,7 +1,7 @@
 # logistics/views.py
 from rest_framework import viewsets
-from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder
-from .serializers import LogisticsStatusSerializer, OrderSerializer, ShipmentProgressSerializer, ArrivedOrderSerializer
+from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo
+from .serializers import LogisticsStatusSerializer, OrderSerializer, ShipmentProgressSerializer, ArrivedOrderSerializer, PackageInfoSerializer
 from rest_framework.response import Response
 from invoice_generator.models import Buyer
 from rest_framework.permissions import IsAuthenticated
@@ -14,6 +14,12 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
+class PackageInfoViewset(viewsets.ModelViewSet):
+
+    queryset = PackageInfo.objects.all()
+    serializer_class = PackageInfoSerializer
+
 
 class LogisticsStatusViewSet(viewsets.ModelViewSet):
     queryset = LogisticsStatus.objects.all().order_by('-timestamp')

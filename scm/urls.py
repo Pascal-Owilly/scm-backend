@@ -35,7 +35,7 @@ from invoice_generator.views import (
 
 )
 from slaughter_house.views import supply_vs_demand_statistics
-from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet
+from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet, PackageInfoViewset
 
 
 from dj_rest_auth.registration.views import (
@@ -166,6 +166,8 @@ router.register(r'payments-to-breeder', AbattoirPaymentToBreaderViewSet, basenam
 router.register(r'customer-service', CustomerServiceViewSet, basename='customer-service')
 
 # Logistics management
+router.register(r'package-info', PackageInfoViewset, basename='package-info')
+
 router.register(r'logistics-status', LogisticsStatusViewSet, basename='logistics')
 router.register(r'all-logistics-statuses', LogisticsStatusAllViewSet, basename='all-logistics-statuses')
 

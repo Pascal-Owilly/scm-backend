@@ -33,7 +33,35 @@ from django.utils.html import strip_tags
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
 
+# DOCUMENT SCANNER
+
+from django.http import JsonResponse
+from PyPDF2 import PdfFileReader
+
+def scan_pdf(request):
+    if request.method == 'POST' and request.FILES['pdf_file']:
+        pdf_file = request.FILES['pdf_file']
+        try:
+            text = extract_text_from_pdf(pdf_file)
+            return JsonResponse({'text': text})
+        except Exception as e:
+            return JsonResponse({'error': str(e)}, status=500)
+    else:
+        return JsonResponse({'error': 'POST request with PDF file required'}, status=400)
+
+def extract_text_from_pdf(pdf_file):
+    text = ''
+    with pdf_file.open() as file:
+        reader = PdfFileReader(file)
+        num_pages = reader.numPages
+        for page_number in range(num_pages):
+            page = reader.getPage(page_number)
+            text += page.extractText()
+    return text
+
+
 class PurchaseOrderViewSet(viewsets.ModelViewSet):
+
     queryset = PurchaseOrder.objects.all()
     serializer_class = PurchaseOrderSerializer
 
@@ -46,7 +74,7 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         # Send email notification to all traders associated with the abattoir
          # Send email notification to the sender
         if serializer.validated_data.get('confirmed', False):
-            subject = 'Purchase Order Confirmation'
+            subject = 'Purchase Order Confirmation '
             sender_email = 'pascalouma54@gmail.com'  # Assuming seller has an email field
             receiver_email = instance.trader_name.user.email  # Assuming trader_name is a ForeignKey to a model with an email field
 
@@ -168,7 +196,6 @@ class QuotationViewSet(viewsets.ModelViewSet):
         # Filter invoices based on the retrieved Buyer instance
         return Quotation.objects.filter(buyer=buyer)
         
-
     def perform_update(self, serializer):
         instance = serializer.save()
 

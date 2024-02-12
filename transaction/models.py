@@ -39,6 +39,7 @@ class BreaderTrade(models.Model):
     breed = models.CharField(max_length=255)
     breeds_supplied = models.PositiveIntegerField(default=0)
     goat_weight = models.PositiveIntegerField(default=0)
+    tag_number = models.CharField(max_length=13, unique=True, null=True, blank=True)
     vaccinated = models.BooleanField(default=False, blank=True, null=True)
     email = models.EmailField()
     phone_number = PhoneNumberField(null=True)
@@ -58,19 +59,25 @@ class BreaderTrade(models.Model):
 
         super().save(*args, **kwargs)
 
+    # Auto-generate tag number starting from "001"
+        if not self.tag_number:
+            last_trade = BreaderTrade.objects.order_by('-id').first()
+            if last_trade:
+                last_tag_number = last_trade.tag_number
+                if last_tag_number:
+                    tag_number_int = int(last_tag_number) + 1
+                    self.tag_number = f"{tag_number_int:03d}"
+            else:
+                self.tag_number = "0012"
+
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.breeder.user} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {self.created_at}"
+
     def __str__(self):
         # formatted_date = self.created_at.strftime('%Y-%m-%d')
         return f"{self.breeder.user} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {self.created_at}"
-# @receiver(post_save, sender=BreaderTrade)
-# def update_breads_supplied(sender, instance, **kwargs):
-#     # Update breeds_supplied field after saving   
-#     aggregated_sum = BreaderTrade.objects.filter(breader=instance.breader).aggregate(models.Sum('breads_supplied'))['breads_supplied__sum']
-#     print(f"Aggregated sum for {instance.breader}: {aggregated_sum}")
-#     instance.breads_supplied = aggregated_sum if aggregated_sum is not None else 0
-#     instance.save()
-
-# # Connect the signal
-# post_save.connect(update_breads_supplied, sender=BreaderTrade)
 
 
 class AbattoirPaymentToBreader(models.Model):

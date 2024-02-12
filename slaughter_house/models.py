@@ -12,7 +12,7 @@ class SlaughterhouseRecord(models.Model):
             ('slaughtered', 'Slaughtered'),
     ]
 
-    breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
+    breed = models.CharField(max_length=255, null=True, blank=True, default='goats')
     slaughter_date = models.DateField(auto_now_add=True)
     # part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
     quantity = models.PositiveIntegerField()

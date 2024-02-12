@@ -14,13 +14,8 @@ class PurchaseOrder(models.Model):
     
     # Header Information
     seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
-    po_number = models.CharField(max_length=100, unique=True)
     date = models.DateField(auto_now_add=True)
     trader_name = models.ForeignKey(Breader, on_delete=models.CASCADE)
-    buyer_address = models.TextField()
-    buyer_contact = models.CharField(max_length=100)
-    seller_address = models.TextField()
-    seller_contact = models.CharField(max_length=100)
     shipping_address = models.TextField()
     confirmed = models.BooleanField(default=False)
     
@@ -29,24 +24,16 @@ class PurchaseOrder(models.Model):
     quantity = models.IntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     tax = models.DecimalField(max_digits=10, decimal_places=2)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     # Terms and Conditions
-    payment_terms = models.CharField(max_length=255)
     delivery_terms = models.CharField(max_length=255)
 
     # Additional Information
-    reference_numbers = models.CharField(max_length=255)
     special_instructions = models.TextField()
-    attachments = models.FileField(upload_to='attachments/', blank=True, null=True)
-
-    # Approval and Signature
-    authorized_signature = models.CharField(max_length=255)
-    signature_date = models.DateField(auto_now_add=True)
-
 
     def __str__(self):
-        return self.po_number
+        return f'purchase order from {self.seller} created on {self.date}'
 
     #-------------Seller LC------------------------------------------------
 
@@ -260,12 +247,14 @@ def pre_save_invoice(sender, instance, **kwargs):
 # Buyer and quotation
 
 class Quotation(models.Model):
+
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
 
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
     product = models.CharField(max_length=100)  # Updated field name
     confirm = models.BooleanField(default=False)
     quantity = models.PositiveIntegerField()  # Updated field name
+    delivery_time = models.DateField(null=True, blank=True)
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # Updated field name
     message = models.TextField()  # Updated field name
     created_at = models.DateTimeField(auto_now_add=True)

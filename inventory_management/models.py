@@ -17,10 +17,11 @@ from django.core.exceptions import ObjectDoesNotExist
 logger = logging.getLogger(__name__)
 
 class BreedCut(models.Model):   
-    breed = models.CharField(max_length=255, choices=BREED_CHOICES)
-    part_name = models.CharField(max_length=255, choices=PART_CHOICES)
-    sale_type = models.CharField(max_length=255, choices=SALE_CHOICES)
+    breed = models.CharField(max_length=255, blank=True, null=True)
+    part_name = models.CharField(max_length=255, blank=True, null=True)
+    sale_type = models.CharField(max_length=255, blank=True, null=True)
     quantity = models.PositiveIntegerField()
+    weight = models.CharField(max_length=10, null=True, blank=True)  
     quantity_left = models.PositiveIntegerField(default=0, editable=False)
     sale_date = models.DateField(auto_now_add=True)
 
@@ -33,7 +34,7 @@ class BreedCut(models.Model):
     
 class InventoryBreed(models.Model):
 
-    breed = models.CharField(max_length=255, choices=BREED_CHOICES, default='goats')
+    breed = models.CharField(max_length=255, default='goats', blank=True, null=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='in_yard')
 
     def __str__(self):
@@ -46,6 +47,7 @@ class InventoryBreedSales(models.Model):
     sale_type = models.CharField(max_length=255, choices=SALE_CHOICES)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='in_the_warehouse')
     quantity = models.PositiveIntegerField()
+    weight = models.CharField(max_length=255, null=True, blank=True)
     sale_date = models.DateField(auto_now_add=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -26,7 +26,7 @@ class BreedCut(models.Model):
     sale_date = models.DateField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.get_breed_display()} - {self.get_part_name_display()} - {self.get_sale_type_display()} - {self.quantity}"
+        return f"{self.breed} - {self.part_name} - {self.quantity}"
 
     # def get_distinct_sales(self):
     #     return self.sales.all().distinct()

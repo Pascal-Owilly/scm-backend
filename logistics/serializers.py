@@ -1,6 +1,6 @@
 # logistics/serializers.py
 from rest_framework import serializers
-from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo
+from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo, ControlCenter, CollateralManager
 
 class PackageInfoSerializer(serializers.ModelSerializer):
 
@@ -33,3 +33,18 @@ class ArrivedOrderSerializer(serializers.ModelSerializer):
     class Meta:
         model = ArrivedOrder
         fields = '__all__'
+
+class ControlCenterSerializer(serializers.ModelSerializer):
+    assiged_agent_full_name = serializers.CharField(source='get_agent_full_name', read_only=True)
+        
+    class Meta:
+        model = ControlCenter       
+        fields = '__all__'
+
+class CollateralManagerSerializer(serializers.ModelSerializer):
+    full_name = serializers.CharField(source='get_full_name', read_only=True)
+    associated_seller_full_name = serializers.CharField(source='get_associated_seller_full_name', read_only=True)
+
+    class Meta:
+        model = CollateralManager
+        fields = ['id', 'full_name', 'associated_seller_full_name']

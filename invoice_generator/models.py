@@ -153,8 +153,17 @@ class ProformaInvoiceFromTraderToSeller(models.Model):
 class Buyer(models.Model):
     buyer = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+
     def get_full_name(self):
-        return f'{self.buyer.first_name} {self.buyer.last_name} - {self.buyer.username}'
+        return f'{self.buyer.first_name} {self.buyer.last_name} '
+    def get_user_name(self):
+        return f'{self.buyer.username}'
+    def get_user_email(self):
+        return f'{self.buyer.email}'
+    def get_user_country(self):
+        return f'{self.buyer.country}'
+    def get_user_address(self):
+        return f'{self.buyer.address}'
 
     def __str__(self):
         return f'{self.buyer.username}'

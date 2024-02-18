@@ -6,6 +6,37 @@ from invoice_generator.models import Invoice, Buyer, Seller
 from custom_registration.models import CustomUser
 from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOICES
 
+# Control centers
+
+class CollateralManager(models.Model):
+    name = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
+    associated_seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+
+    def get_full_name(self):
+        return f'{self.name.first_name} {self.name.last_name}' if self.name else "No  manager assigned"
+
+    def get_associated_seller_full_name(self):
+        return self.associated_seller.get_full_name() if self.associated_seller else "No seller assigned"
+
+    def __str__(self):
+        return self.name.username if self.name else "Unnamed Collateral Manager"
+
+class ControlCenter(models.Model):
+    name = models.CharField(max_length=100)
+    location = models.CharField(max_length=100)
+    address = models.CharField(max_length=255, null=True, blank=True)
+    contact = models.CharField(max_length=255, null=True, blank=True)
+    assigned_collateral_agent = models.ForeignKey(CollateralManager, on_delete=models.CASCADE, null=True, blank=True)
+
+    def get_agent_full_name(self):
+        if self.assigned_collateral_agent:
+            return self.assigned_collateral_agent.get_full_name()
+        else:
+            return "No assigned collateral agent"
+
+    def __str__(self):
+        return self.name
+
 class Order(models.Model):
     order_number = models.CharField(max_length=20)
     status = models.CharField(max_length=20)
@@ -55,6 +86,7 @@ class LogisticsStatus(models.Model):
     time_of_delivery = models.DateField(null=True, blank=True)
     shipping_mode = models.CharField(max_length=255, null=True, blank=True)
     logistics_company = models.CharField(max_length=255, null=True, blank=True)
+    associated_control_center = models.ForeignKey(ControlCenter, on_delete=models.CASCADE, null=True, blank=True)
     invoice = models.ForeignKey(Invoice, on_delete=models.CASCADE)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default="ordered")
     package_info = models.ForeignKey(PackageInfo, on_delete=models.CASCADE, blank=True, null=True)
@@ -72,3 +104,4 @@ class LogisticsStatus(models.Model):
 
     def __str__(self):
         return f'{self.status} - {self.invoice}'
+

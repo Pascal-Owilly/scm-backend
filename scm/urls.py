@@ -34,8 +34,8 @@ from invoice_generator.views import (
     QuotationViewSet,
 
 )
-from slaughter_house.views import supply_vs_demand_statistics
-from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet, PackageInfoViewset
+from slaughter_house.views import supply_vs_demand_statistics, compare_weight_loss
+from logistics.views import LogisticsStatusViewSet, OrderViewSet, ShipmentProgressViewSet, ArrivedOrderViewSet, LogisticsStatusAllViewSet, PackageInfoViewset, CollateralManagerViewSet, ControlCenterViewSet
 
 
 from dj_rest_auth.registration.views import (
@@ -189,6 +189,11 @@ router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')
 router.register(r'generate-invoice', InvoiceViewSet)
 router.register(r'buyers', BuyerViewSet)
 
+# Control centers
+
+router.register(r'control-centers', ControlCenterViewSet)
+router.register(r'collateral-managers', CollateralManagerViewSet, basename='collateral-manager')
+
 schema_view = get_schema_view(
    openapi.Info(
       title="SCM APIs",
@@ -226,6 +231,7 @@ urlpatterns = [
     # path('api/total_breeds_supplied/', total_breeds_supplied, name='total_breeds_supplied'),
     
     path('api/supply-vs-demand/', supply_vs_demand_statistics, name='supply_vs_demand_statistics'),
+    path('api/compare-weight-loss-after-slaughter/', compare_weight_loss, name='compare-weight-loss-after-slaughter'),
 
     # Equity bank Payments
     # path('make_payment/<int:breeder_trade_id>/', make_payment, name='make_payment'),

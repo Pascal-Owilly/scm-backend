@@ -1,7 +1,14 @@
 # logistics/views.py
 from rest_framework import viewsets
-from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo
-from .serializers import LogisticsStatusSerializer, OrderSerializer, ShipmentProgressSerializer, ArrivedOrderSerializer, PackageInfoSerializer
+from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo, CollateralManager,ControlCenter
+from .serializers import (LogisticsStatusSerializer,
+    OrderSerializer, 
+    ShipmentProgressSerializer, 
+    ArrivedOrderSerializer, 
+    PackageInfoSerializer,
+    CollateralManagerSerializer,
+    ControlCenterSerializer
+    )
 from rest_framework.response import Response
 from invoice_generator.models import Buyer
 from rest_framework.permissions import IsAuthenticated
@@ -154,3 +161,11 @@ class ShipmentProgressViewSet(viewsets.ModelViewSet):
 class ArrivedOrderViewSet(viewsets.ModelViewSet):
     queryset = ArrivedOrder.objects.all().order_by('-timestamp')
     serializer_class = ArrivedOrderSerializer
+
+class ControlCenterViewSet(viewsets.ModelViewSet):
+    queryset = ControlCenter.objects.all()
+    serializer_class = ControlCenterSerializer
+
+class CollateralManagerViewSet(viewsets.ModelViewSet):
+    queryset = CollateralManager.objects.all()
+    serializer_class = CollateralManagerSerializer

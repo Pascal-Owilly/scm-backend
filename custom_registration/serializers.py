@@ -128,8 +128,15 @@ class CustomerServiceSerializer(serializers.ModelSerializer):
 
 # sellers
 class SellerSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+    formatted_created_at = serializers.SerializerMethodField()
+
     class Meta:
         model = Seller
-        fields = '__all__'
+        fields = ['id', 'full_name', 'formatted_created_at']
 
+    def get_full_name(self, obj):
+        return obj.get_full_name()
 
+    def get_formatted_created_at(self, obj):
+        return obj.created_at.strftime('%B %d, %Y %I:%M %p')

@@ -145,6 +145,11 @@ class BuyerViewSet(viewsets.ModelViewSet):
     queryset = Buyer.objects.all().order_by('-created_at')
     serializer_class = BuyerSerializer
 
+    def create(self, request, *args, **kwargs):
+        # Modify the request data to associate the buyer with the user
+        request.data['user'] = request.user.id  # Assuming user is authenticated
+        return super().create(request, *args, **kwargs)
+
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all().order_by('-invoice_date')
     serializer_class = InvoiceSerializer

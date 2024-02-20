@@ -22,11 +22,11 @@ class ProformaInvoiceFromTraderToSellerSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class BuyerSerializer(serializers.ModelSerializer):
-    full_name = serializers.CharField(source='get_full_name', read_only=True)
-    username = serializers.CharField(source='get_user_name', read_only=True)
-    email = serializers.CharField(source='get_user_email', read_only=True)
-    address = serializers.CharField(source='get_user_address', read_only=True)
-    country = serializers.CharField(source='get_user_country', read_only=True)
+    full_name = serializers.CharField(source='get_full_name')
+    username = serializers.CharField(source='get_user_name')
+    email = serializers.CharField(source='get_user_email')
+    address = serializers.CharField(source='get_user_address')
+    country = serializers.CharField(source='get_user_country')
 
     class Meta:
         model = Buyer

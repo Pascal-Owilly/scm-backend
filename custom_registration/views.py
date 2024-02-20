@@ -7,10 +7,14 @@ from rest_framework.generics import RetrieveUpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
-from django.shortcuts import get_object_or_404
+from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.decorators import api_view
 
 from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService, Seller
+from logistics.models import CollateralManager
+from transaction.models import Breader
+from invoice_generator.models import Buyer
+
 from rest_framework import status
 
 from .serializers import CustomUserSerializer, LogoutSerializer, CustomTokenObtainPairSerializer, UserProfileSerializer, CustomerServiceSerializer, PasswordResetConfirmSerializer, PasswordResetRequestSerializer, SellerSerializer
@@ -79,24 +83,34 @@ class CustomUserRegistrationViewSet(viewsets.ViewSet):
     serializer_class = CustomUserSerializer
 
     def create(self, request, *args, **kwargs):
-        from custom_registration.serializers import CustomUserSerializer  # Import here to break the circular import
-
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             user = serializer.save()
 
-            # Assign a role to the user, replace 'default_role' with your logic
-            user.role = 'No role'  # Replace with your logic for assigning roles
-            user.save()
+            # Assign a role to the user based on user_type
+            user_type = request.data.get('user_type')
+            if user_type == 'buyer':
+                user.role = 'buyer'
+                Buyer.objects.create(buyer=user)
+            elif user_type == 'breeder':
+                user.role = 'breeder'
+                Breader.objects.create(breeder=user)
+            elif user_type == 'collateral_manager':
+                user.role = 'collateral_manager'
+                CollateralManager.objects.create(name=user)
+            else:
+                # Handle invalid user types here
+                pass
 
+            user.save()
 
             # Refresh token after saving the user instance
             refresh = RefreshToken.for_user(user)
 
             tokens = {'refresh': str(refresh), 'access': str(refresh.access_token)}
-            return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=200)
-        return Response(serializer.errors, status=400)
-
+            return Response({'user': {'id': user.id, 'username': user.username}, 'tokens': tokens}, status=HTTP_200_OK)
+        return Response(serializer.errors, status=HTTP_400_BAD_REQUEST)
+        
 class PasswordResetRequestView(APIView):
     def post(self, request):
         serializer = PasswordResetRequestSerializer(data=request.data)

@@ -22,8 +22,8 @@ class CollateralManager(models.Model):
         return self.name.username if self.name else "Unnamed Collateral Manager"
 
 class ControlCenter(models.Model):
-    name = models.CharField(max_length=100)
-    location = models.CharField(max_length=100)
+    name = models.CharField(max_length=100, null=True, blank=True)
+    location = models.CharField(max_length=100, null=True, blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     contact = models.CharField(max_length=255, null=True, blank=True)
     assigned_collateral_agent = models.ForeignKey(CollateralManager, on_delete=models.CASCADE, null=True, blank=True)

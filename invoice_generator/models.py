@@ -155,18 +155,35 @@ class Buyer(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def get_full_name(self):
-        return f'{self.buyer.first_name} {self.buyer.last_name} '
+        if self.buyer:
+            return f'{self.buyer.first_name} {self.buyer.last_name}'
+        return "Unknown"
+
     def get_user_name(self):
-        return f'{self.buyer.username}'
+        if self.buyer:
+            return self.buyer.username
+        return "Unknown"
+
     def get_user_email(self):
-        return f'{self.buyer.email}'
+        if self.buyer:
+            return self.buyer.email
+        return "Unknown"
+
     def get_user_country(self):
-        return f'{self.buyer.country}'
+        if self.buyer:
+            return self.buyer.country
+        return "Unknown"
+
     def get_user_address(self):
-        return f'{self.buyer.address}'
+        if self.buyer:
+            return self.buyer.address
+        return "Unknown"
 
     def __str__(self):
-        return f'{self.buyer.username}'
+        if self.buyer:
+            return self.buyer.username
+        return "Unknown"
+
 
 class LetterOfCredit(models.Model):
     STATUS_CHOICES = [

@@ -11,7 +11,7 @@ import string
 
 class Breader(models.Model):
 
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
 
     def __str__(self):
 

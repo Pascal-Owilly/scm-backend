@@ -13,9 +13,9 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 
 from rest_framework import viewsets, status
-from .models import Invoice, Buyer, LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller, Quotation
+from .models import Invoice, Buyer, LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller, Quotation, DocumentToSeller
 from logistics.models import LogisticsStatus
-from .serializers import InvoiceSerializer, BuyerSerializer, LetterOfCreditSerializer, LetterOfCreditSellerToTraderSerializer, PurchaseOrderSerializer, ProformaInvoiceFromTraderToSellerSerializer, QuotationSerializer
+from .serializers import InvoiceSerializer, BuyerSerializer, LetterOfCreditSerializer, LetterOfCreditSellerToTraderSerializer, PurchaseOrderSerializer, ProformaInvoiceFromTraderToSellerSerializer, QuotationSerializer, DocumentToSellerSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from custom_registration.models import CustomUser, Seller 
@@ -76,7 +76,7 @@ class PurchaseOrderViewSet(viewsets.ModelViewSet):
         if serializer.validated_data.get('confirmed', False):
             subject = 'Purchase Order Confirmation '
             sender_email = 'pascalouma54@gmail.com'  # Assuming seller has an email field
-            receiver_email = instance.trader_name.user.email  # Assuming trader_name is a ForeignKey to a model with an email field
+            receiver_email = instance.trader_name.breeder.email  # Assuming trader_name is a ForeignKey to a model with an email field
 
             # Render email template
             email_context = {'purchase_order': instance}
@@ -188,6 +188,11 @@ class InvoiceViewSet(viewsets.ModelViewSet):
 
 # Buyer and quotation
 
+class QuotationAllViewSet(viewsets.ModelViewSet):
+    queryset = Quotation.objects.all()
+    serializer_class = QuotationSerializer
+
+
 class QuotationViewSet(viewsets.ModelViewSet):
     queryset = Quotation.objects.all()
     serializer_class = QuotationSerializer
@@ -230,6 +235,19 @@ class QuotationViewSet(viewsets.ModelViewSet):
             instance.buyer.save()
 
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+class LetterOfCreditAllViewSet(viewsets.ModelViewSet):
+    queryset = LetterOfCredit.objects.all().order_by('-issue_date')
+    serializer_class = LetterOfCreditSerializer
+    # lookup_field = 'pk'  # Ensure this line is present
+
+class DocumentToSellerViewSet(viewsets.ModelViewSet):
+    queryset = DocumentToSeller.objects.all()
+    serializer_class = DocumentToSellerSerializer
+
+   
+
+
 
 class LetterOfCreditViewSet(viewsets.ModelViewSet):
     queryset = LetterOfCredit.objects.all().order_by('-issue_date')

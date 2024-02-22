@@ -15,7 +15,7 @@ class Breader(models.Model):
 
     def __str__(self):
 
-        return f'{self.user.first_name} {self.user.last_name} '
+        return f'{self.breeder.first_name} {self.breeder.last_name} '
 
 
 class Abattoir(models.Model):

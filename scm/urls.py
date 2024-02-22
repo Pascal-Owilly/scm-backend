@@ -26,12 +26,15 @@ from invoice_generator.views import (
     BuyerViewSet,
     InvoiceViewSet,
     LetterOfCreditViewSet,
+    LetterOfCreditAllViewSet,
     download_invoice_document,
     download_lc_document,
     PurchaseOrderViewSet,
     LetterOfCreditSellerToTraderViewSet,
     ProformaInvoiceFromTraderToSellerViewSet,
     QuotationViewSet,
+    QuotationAllViewSet,
+    DocumentToSellerViewSet
 
 )
 from slaughter_house.views import supply_vs_demand_statistics, compare_weight_loss
@@ -99,17 +102,18 @@ invoice_detail = InvoiceViewSet.as_view({'get': 'retrieve', 'put': 'update', 'de
 lc_list = LetterOfCreditViewSet.as_view({'get': 'list', 'post': 'create'})
 lc_detail = LetterOfCreditViewSet.as_view({'get': 'retrieve', 'put': 'update', 'delete': 'destroy'})
 
-
 # Breeders
 router.register(r'traders', BreaderViewSet)
 
 # Purchase order and Lc Local. Profoma invoice
 router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchase-orders')
 router.register(r'letters-of-credit-to-local-traders', LetterOfCreditSellerToTraderViewSet, basename='letters-of-credit-to-local-traders')
+router.register(r'all-lcs', LetterOfCreditAllViewSet, basename='all-lcs')
+
 router.register(r'profoma-invoice-to-local-sellers', ProformaInvoiceFromTraderToSellerViewSet, basename='profoma-invoice-to-local-sellers')
 
     # router.register(r'profile', ProfileViewset)
-
+router.register(r'documents-to-seller', DocumentToSellerViewSet)
 
 # breed sales from transaction
 router.register(r'inventory-breed-sales', InventoryBreedSalesViewSet)
@@ -155,6 +159,7 @@ router.register(r'sellers', SellerViewSet, basename='sellers')
 # Buyer
 router.register(r'register-buyer', CustomUserRegistrationViewSet, basename='register-buyer')
 router.register(r'send-quotation', QuotationViewSet, basename='send-quotation')
+router.register(r'quotations', QuotationAllViewSet, basename='quotations')
 
 
 # Payments

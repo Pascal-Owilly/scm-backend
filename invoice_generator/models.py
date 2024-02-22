@@ -13,9 +13,9 @@ from custom_registration.models import Seller
 class PurchaseOrder(models.Model):
     
     # Header Information
-    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField(auto_now_add=True)
-    trader_name = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    trader_name = models.ForeignKey(Breader, on_delete=models.CASCADE, null=True, blank=True)
     shipping_address = models.TextField()
     confirmed = models.BooleanField(default=False)
     
@@ -204,34 +204,16 @@ class LetterOfCredit(models.Model):
     def __str__(self):
         return f'Letter of Credit #{self.id} from the bank, issued at {self.issue_date} - Status: {self.status} '
 
+class DocumentToSeller(models.Model):
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
+    message = models.CharField(max_length=255, null=True, blank=True)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+
+
 class Invoice(models.Model):
-    MEAT_CHOICES = [
-        ('chevon', 'Chevon (Goat Meat)'),
-        ('mutton', 'Mutton'),
-        ('beef', 'Beef'),
-        ('pork', 'Pork'),
-    ]
-
-    PART_CHOICES = [
-        ('ribs', 'Ribs'),
-        ('thighs', 'Thighs'),
-        ('loin', 'Loin'),
-        ('shoulder', 'Shoulder'),
-        ('shanks', 'Shanks'),
-        ('organ_meat', 'Organ Meat'),
-        ('intestines', 'Intestines'),
-        ('tripe', 'Tripe'),
-        ('sweetbreads', 'Sweetbreads'),
-    ]
-
-    SALE_CHOICES = [
-        ('export_cut', 'Export Cut'),
-        ('local_cut', 'Local Cut'),
-    ]
-
-    breed = models.CharField(max_length=255, choices=MEAT_CHOICES, default='chevon')
-    part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='ribs')
-    sale_type = models.CharField(max_length=255, choices=SALE_CHOICES, default='export_cut')
+    breed = models.CharField(max_length=255)
+    part_name = models.CharField(max_length=255)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
@@ -239,15 +221,14 @@ class Invoice(models.Model):
     due_date = models.DateField(editable=False, null=True, blank=True)
 
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
-    
+
     # File field for storing uploaded documents
-    attached_lc_document = models.FileField(upload_to='invoice_documents/', null=False, blank=False)
     
     # Add a SlugField for the invoice number
     invoice_number = models.SlugField(max_length=50, unique=True, editable=False)
 
     def __str__(self):
-        return f'Invoice #{self.invoice_number} for {self.breed} {self.part_name} of type {self.sale_type} - {self.quantity} pieces, generated and sent to {self.buyer} on {self.invoice_date}'
+        return f'Invoice #{self.invoice_number} for {self.breed} {self.part_name} - {self.quantity} pieces, generated and sent to {self.buyer} on {self.invoice_date}'
 
 @receiver(pre_save, sender=Invoice)
 def pre_save_invoice(sender, instance, **kwargs):

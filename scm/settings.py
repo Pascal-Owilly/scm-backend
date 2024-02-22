@@ -44,10 +44,10 @@ SECRET_KEY = 'django-insecure-$d8&01e=mjlo33y+47z0fm^1(0rj@l&s5lyus!97mbuufp%r#%
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1']
+ALLOWED_HOSTS = ['127.0.0.1', 'api.intellima.tech', 'https://xyz-m.vercel.app']
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ORIGIN_TRUSTED_ORIGINS = ['http://localhost:5173']
+CORS_ORIGIN_TRUSTED_ORIGINS = ['http://localhost:5173', 'api.intellima.tech']
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",  # Add your React frontend's origin
     "http://127.0.0.1:5173",  # Add your React frontend's origin
@@ -213,6 +213,7 @@ AWS_ACCESS_KEY_ID = config('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = config('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = config('AWS_STORAGE_BUCKET_NAME')
 AWS_S3_REGION_NAME = config('AWS_S3_REGION_NAME')
+# STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
 
 # Configure S3 for serving static files.
 STATIC_URL = '/static/'

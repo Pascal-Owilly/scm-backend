@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Invoice, Buyer,LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller, Quotation
+from .models import Invoice, Buyer,LetterOfCredit, LetterOfCreditSellerToTrader, PurchaseOrder, ProformaInvoiceFromTraderToSeller, Quotation, DocumentToSeller
 from custom_registration.models import CustomUser  
 from logistics.serializers import LogisticsStatusSerializer, LogisticsStatus
 
@@ -50,6 +50,12 @@ class InvoiceSerializer(serializers.ModelSerializer):
                 validated_data['buyer'] = buyer
 
         return super().create(validated_data)
+
+class DocumentToSellerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = DocumentToSeller
+        fields = ['id', 'seller', 'file', 'uploaded_at']
+
 
 class LetterOfCreditSerializer(serializers.ModelSerializer):
     buyer = BuyerSerializer(allow_null=True,required=False)

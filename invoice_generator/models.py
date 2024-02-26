@@ -210,7 +210,6 @@ class DocumentToSeller(models.Model):
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
 
-
 class Invoice(models.Model):
     breed = models.CharField(max_length=255)
     part_name = models.CharField(max_length=255)
@@ -218,9 +217,10 @@ class Invoice(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     invoice_date = models.DateField(auto_now_add=True)
-    due_date = models.DateField(editable=False, null=True, blank=True)
+    # due_date = models.DateTimeField(editable=False, null=True, blank=True)
 
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
 
     # File field for storing uploaded documents
     

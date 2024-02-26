@@ -79,7 +79,8 @@ INSTALLED_APPS = [
     'invoices',
     'payments',
     'logistics',
-
+    'lc_scanner',
+    
         # 3rd party
 
     "rest_framework",

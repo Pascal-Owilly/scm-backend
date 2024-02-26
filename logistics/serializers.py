@@ -16,6 +16,17 @@ class LogisticsStatusSerializer(serializers.ModelSerializer):
         model = LogisticsStatus
         fields = '__all__'
 
+        #  def to_representation(self, instance):
+        # representation = super().to_representation(instance)
+        # if instance.invoice:
+        #     representation['buyer_full_name'] = instance.buyer.get_full_name() if instance.buyer else "Unknown"
+        #     representation['seller_full_name'] = instance.seller.get_full_name() if instance.seller else "Unknown"
+        # else:
+        #     representation['buyer_full_name'] = "Unknown"
+        #     representation['seller_full_name'] = "Unknown"
+        # return representation
+
+
 class OrderSerializer(serializers.ModelSerializer):
     # Update the source to use 'id' instead of 'invoice.invoice_number'
     invoice_number = serializers.ReadOnlyField(source='invoice.invoice_number')

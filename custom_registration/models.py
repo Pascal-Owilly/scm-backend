@@ -167,6 +167,31 @@ class Seller(models.Model):
     def get_full_name(self):
         return f'{self.seller.first_name} {self.seller.last_name} '
 
+    def get_user_name(self):
+        if self.seller:
+            return self.seller.username
+        return "Unknown"
+
+    def get_user_email(self):
+        if self.seller:
+            return self.seller.email
+        return "Unknown"
+
+    def get_user_country(self):
+        if self.seller:
+            return self.seller.country
+        return "Unknown"
+
+    def get_user_address(self):
+        if self.seller:
+            return self.seller.address
+        return "Unknown"
+
+    def __str__(self):
+        if self.seller:
+            return self.seller.username
+        return "Unknown"
+
     def __str__(self):
         return f'{self.seller.username}'
 

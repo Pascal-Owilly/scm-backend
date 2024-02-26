@@ -153,7 +153,7 @@ class BuyerViewSet(viewsets.ModelViewSet):
 class InvoiceViewSet(viewsets.ModelViewSet):
     queryset = Invoice.objects.all().order_by('-invoice_date')
     serializer_class = InvoiceSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         print(f"User: {self.request.user}")
@@ -186,6 +186,10 @@ class InvoiceViewSet(viewsets.ModelViewSet):
             print(f"Error in perform_create: {e}")
             raise
 
+class InvoiceAllViewSet(viewsets.ModelViewSet):
+    queryset = Invoice.objects.all().order_by('-invoice_date')
+    serializer_class = InvoiceSerializer
+
 # Buyer and quotation
 
 class QuotationAllViewSet(viewsets.ModelViewSet):
@@ -214,10 +218,10 @@ class QuotationViewSet(viewsets.ModelViewSet):
             subject = 'Quotation Confirmation'
             
             # Buyer's name
-            buyer_name = instance.buyer.buyer.get_full_name() if instance.buyer.buyer else 'Unknown Buyer'
+            buyer_name = instance.buyer.id if instance.buyer.buyer else 'Unknown Buyer'
             buyer_email = instance.buyer.buyer.email
             # Seller's name
-            seller_name = instance.seller.seller.get_full_name() if instance.seller else 'Unknown Seller'
+            seller_name = instance.seller.seller.id if instance.seller else 'Unknown Seller'
             
             # Email context
             context = {'buyer_name': buyer_name, 'seller_name': seller_name}

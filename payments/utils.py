@@ -84,7 +84,7 @@ def generate_equity_bank_signature(breeder_trade):
         private_key = RSA.importKey(myfile.read())
 
     # Create the data to be signed
-    signature_data = f"{breeder_trade.abattoir.account_number}{str(breeder_trade.price)}{settings.CURRENCY_CODE}{breeder_trade.reference}"
+    signature_data = f"{breeder_trade.seller.account_number}{str(breeder_trade.price)}{settings.CURRENCY_CODE}{breeder_trade.reference}"
     print('Signature Data before encoding:', signature_data)
 
     # Sign the data using the private key
@@ -119,8 +119,8 @@ def make_equity_bank_transfer_request(breeder_trade, access_token, signature):
     payload = {
     "source": {
         "countryCode": "KE",  
-        "name": breeder_trade.abattoir.user.username,  
-        "accountNumber": breeder_trade.abattoir.account_number  
+        "name": breeder_trade.seller.user.username,  
+        "accountNumber": breeder_trade.seller.account_number  
     },
     "destination": {
         "type": "bank",

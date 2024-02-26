@@ -8,7 +8,7 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from django.db.models import Sum
 from custom_registration.models import BankTeller, CustomerService
-from django.template.loader import render_to_string  # Add this import
+from django.template.loader import render_to_string  
 from django.utils.html import strip_tags
 from django.core.mail import send_mail
 from rest_framework.permissions import IsAuthenticated
@@ -37,12 +37,27 @@ class UserSuppliedBreedsViewSet(viewsets.ReadOnlyModelViewSet):
         return BreaderTrade.objects.filter(breeder=self.request.user)
 
 class BreaderTradeViewSet(viewsets.ModelViewSet):
-
     queryset = BreaderTrade.objects.all().order_by('-transaction_date')
     serializer_class = BreaderTradeSerializer
+    # permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.breeder
+        if user.role == 'seller':
+            # Filter the queryset to show only breeds supplied by the breeder associated with the supplier
+            return BreaderTrade.objects.filter(breeder=breeder)
+        else:
+            # For other roles, return an empty queryset
+            return BreaderTrade.objects.none()
 
     def create(self, request, *args, **kwargs):
         try:
+            # Get the authenticated breeder (assuming breeder is the trader)
+            breeder = request.breeder
+
+            # Assign the current breeder as the breeder for the newly created trade
+            request.data['breeder'] = breeder.id
+
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)

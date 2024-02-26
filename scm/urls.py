@@ -25,6 +25,7 @@ from mpesa_payments.views import MpesaPaymentView
 from invoice_generator.views import (
     BuyerViewSet,
     InvoiceViewSet,
+    InvoiceAllViewSet,
     LetterOfCreditViewSet,
     LetterOfCreditAllViewSet,
     download_invoice_document,
@@ -192,6 +193,8 @@ router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')
 
 # Create a router and register our viewsets with it.
 router.register(r'generate-invoice', InvoiceViewSet)
+router.register(r'invoices', InvoiceAllViewSet)
+
 router.register(r'buyers', BuyerViewSet)
 
 # Control centers

@@ -2,21 +2,20 @@ from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
-from custom_registration.models import CustomUser, Bank
+from custom_registration.models import CustomUser, Bank, Seller
 from datetime import datetime
 import uuid
 import random
 import string
 
-
 class Breader(models.Model):
 
     breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-
+    # breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
 
         return f'{self.breeder.first_name} {self.breeder.last_name} '
-
 
 class Abattoir(models.Model):
 
@@ -28,13 +27,12 @@ class Abattoir(models.Model):
 
         return f'{self.user.first_name} {self.user.last_name} '
 
-
 class BreaderTrade(models.Model):
             
     PRODUCTS = []
 
     breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
-    abattoir = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     transaction_date = models.DateField(auto_now_add=True)
     breed = models.CharField(max_length=255)
     breeds_supplied = models.PositiveIntegerField(default=0)
@@ -59,9 +57,7 @@ class BreaderTrade(models.Model):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.breeder.user} supplied {self.breeds_supplied} {self.breed}'s to {self.abattoir} on {self.created_at}"
-
-    
+        return f"{self.breeder.breeder} supplied {self.breeds_supplied} {self.breed}'s to {self.seller} on {self.created_at}"
 
 class AbattoirPaymentToBreader(models.Model):
     SENT_TO_BANK = 'payment_initiated'

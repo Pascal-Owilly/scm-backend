@@ -30,31 +30,52 @@ class BuyerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Buyer
-        fields = ['id', 'buyer', 'full_name', 'username', 'email', 'address', 'country']  # Include other fields as needed
+        fields = ['id', 'buyer', 'created_at', 'full_name', 'username', 'email', 'address', 'country']
+
 
 class InvoiceSerializer(serializers.ModelSerializer):
-    buyer = BuyerSerializer(required=False)
+    buyer_full_name = serializers.SerializerMethodField()
+    buyer_user_name = serializers.SerializerMethodField()
+    buyer_user_email = serializers.SerializerMethodField()
+    buyer_user_country = serializers.SerializerMethodField()
+    buyer_user_address = serializers.SerializerMethodField()
 
     class Meta:
         model = Invoice
         fields = '__all__'
 
     def create(self, validated_data):
-        buyer_data = validated_data.pop('buyer', None)
-
-        if buyer_data:
-            buyer = buyer_data.pop('buyer', None)
-
-            if buyer_data:
-                buyer, created = Buyer.objects.get_or_create(**buyer_data)
-                validated_data['buyer'] = buyer
-
         return super().create(validated_data)
+
+    def get_buyer_full_name(self, obj):
+        if obj.buyer:
+            return obj.buyer.get_full_name()
+        return "Unknown"
+
+    def get_buyer_user_name(self, obj):
+        if obj.buyer:
+            return obj.buyer.get_user_name()
+        return "Unknown"
+
+    def get_buyer_user_email(self, obj):
+        if obj.buyer:
+            return obj.buyer.get_user_email()
+        return "Unknown"
+
+    def get_buyer_user_country(self, obj):
+        if obj.buyer:
+            return obj.buyer.get_user_country()
+        return "Unknown"
+
+    def get_buyer_user_address(self, obj):
+        if obj.buyer:
+            return obj.buyer.get_user_address()
+        return "Unknown"
 
 class DocumentToSellerSerializer(serializers.ModelSerializer):
     class Meta:
         model = DocumentToSeller
-        fields = ['id', 'seller', 'file', 'uploaded_at']
+        fields = ['id', 'seller', 'message', 'uploaded_at']
 
 
 class LetterOfCreditSerializer(serializers.ModelSerializer):

@@ -68,7 +68,8 @@ class PackageInfo(models.Model):
     weight = models.CharField(max_length=255, null=True, blank=True)
     height = models.CharField(max_length=255, null=True, blank=True)
     length = models.CharField(max_length=255, null=True, blank=True)
-    
+    bill_of_lading=models.FileField(upload_to='bill_of_landings', null=True, blank=True)
+
     def __str__(self):
         return self.package_name
 
@@ -80,10 +81,10 @@ class LogisticsStatus(models.Model):
         ('arrived', 'Arrival'),
         ('received', 'Received'),
     ]
-
+    
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
-    time_of_delivery = models.DateField(null=True, blank=True)
+    # time_of_delivery = models.DateField(null=True, blank=True)
     shipping_mode = models.CharField(max_length=255, null=True, blank=True)
     logistics_company = models.CharField(max_length=255, null=True, blank=True)
     associated_control_center = models.ForeignKey(ControlCenter, on_delete=models.CASCADE, null=True, blank=True)
@@ -92,6 +93,16 @@ class LogisticsStatus(models.Model):
     package_info = models.ForeignKey(PackageInfo, on_delete=models.CASCADE, blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_status_updated = models.BooleanField(default=False)
+    
+    def save(self, *args, **kwargs):
+        # Populate buyer and seller from the associated invoice
+        if not self.buyer or not self.seller:
+            invoice = self.invoice
+            if invoice:
+                self.buyer = invoice.buyer
+                self.seller = invoice.seller
+        super().save(*args, **kwargs)
+
 
     @property
     def is_arrived(self):

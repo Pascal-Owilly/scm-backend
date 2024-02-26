@@ -9,6 +9,7 @@ from rest_framework.generics import ListAPIView
 from rest_framework.decorators import action
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST
 from rest_framework.decorators import api_view
+from django.shortcuts import get_object_or_404
 
 from .models import CustomUser, UserProfile, Payment, BankTeller, CustomerService, Seller
 from logistics.models import CollateralManager
@@ -37,7 +38,7 @@ from django.urls import reverse
 from django.urls import reverse_lazy
 from django.utils.encoding import force_str
 from django.utils.http import urlsafe_base64_decode
-
+from transaction.models import Breader
 
 class GetUserRole(APIView):
     def get(self, request):
@@ -95,6 +96,9 @@ class CustomUserRegistrationViewSet(viewsets.ViewSet):
             elif user_type == 'breeder':
                 user.role = 'breeder'
                 Breader.objects.create(breeder=user)
+            elif user_type == 'seller':
+                user.role = 'admin'
+                Seller.objects.create(seller=user)
             elif user_type == 'collateral_manager':
                 user.role = 'collateral_manager'
                 CollateralManager.objects.create(name=user)
@@ -437,7 +441,6 @@ class SellerViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def send_quotation_and_message_to_buyer(self, request):
-        # Ensure all required data is provided in the request
         required_fields = ['buyer_id', 'message', 'product', 'quantity', 'unit_price']
         for field in required_fields:
             if field not in request.data:
@@ -449,10 +452,8 @@ class SellerViewSet(viewsets.ModelViewSet):
         quantity = request.data.get('quantity')
         unit_price = request.data.get('unit_price')
 
-        # Ensure the buyer exists and has the role 'BUYER'
         buyer = get_object_or_404(CustomUser, id=buyer_id, role='BUYER')
 
-        # Create a new Quotation object
         quotation_data = {
             'buyer': buyer_id,  
             'product': product,
@@ -465,7 +466,16 @@ class SellerViewSet(viewsets.ModelViewSet):
         else:
             return Response(quotation_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # Here you would implement the logic to send the message to the buyer
-        # For the sake of this example, let's assume the message is sent successfully
         return Response({'message': f'Message and quotation sent to buyer {buyer_id}: {message}', 'quotation_id': quotation.id}, status=status.HTTP_200_OK)
+        
+    # def get_queryset(self):
+    #         # Get the currently logged-in user
+    #         user = self.request.user
 
+    #         # Retrieve the associated breeder instance for the logged-in user
+    #         breeder = get_object_or_404(Breader, user=user)
+
+    #         # Filter sellers based on the relationship with the logged-in breeder
+    #         queryset = Seller.objects.filter(breeder=breeder)
+
+    #         return queryset

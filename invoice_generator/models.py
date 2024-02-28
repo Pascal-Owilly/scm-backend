@@ -143,7 +143,7 @@ class ProformaInvoiceFromTraderToSeller(models.Model):
     def __str__(self):
         return f'Invoice #{self.invoice_number} for {self.seller.first_name} - {self.date}'
 
-#--------------------- End profoma-------------------------------------
+# --------------------- End profoma-------------------------------------
 
 # ----------------End Seller-----------------------------------------------
 
@@ -184,19 +184,19 @@ class Buyer(models.Model):
             return self.buyer.username
         return "Unknown"
 
-
 class LetterOfCredit(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
-        ('received', 'Received'),
+        ('sent_to_bank', 'Sent to bank'),
         ('approved', 'Approved'),
         ('rejected', 'Rejected'),
     ]
 
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE, null=True, blank=True)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     issue_date = models.DateTimeField(auto_now_add=True)
     expiry_date = models.DateField(auto_now_add=True)
-    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='received')
+    status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='sent_to_bank')
 
     # File field for storing uploaded documents
     lc_document = models.FileField(upload_to='lc_documents/', null=True, blank=True)

@@ -47,15 +47,24 @@ class ArrivedOrderSerializer(serializers.ModelSerializer):
 
 class ControlCenterSerializer(serializers.ModelSerializer):
     assiged_agent_full_name = serializers.CharField(source='get_agent_full_name', read_only=True)
-        
+    formatted_created_at = serializers.SerializerMethodField()
+
     class Meta:
         model = ControlCenter       
         fields = '__all__'
 
+    def get_formatted_created_at(self, obj):
+        return obj.created_at.strftime('%B %d, %Y %I:%M %p')
+
+
 class CollateralManagerSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)
     associated_seller_full_name = serializers.CharField(source='get_associated_seller_full_name', read_only=True)
+    formatted_created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = CollateralManager
-        fields = ['id', 'full_name', 'associated_seller_full_name']
+        fields = ['id', 'full_name', 'associated_seller_full_name', 'formatted_created_at']
+
+    def get_formatted_created_at(self, obj):
+        return obj.created_at.strftime('%B %d, %Y %I:%M %p')

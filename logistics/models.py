@@ -11,6 +11,7 @@ from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOIC
 class CollateralManager(models.Model):
     name = models.ForeignKey(CustomUser, on_delete=models.CASCADE, null=True, blank=True)
     associated_seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def get_full_name(self):
         return f'{self.name.first_name} {self.name.last_name}' if self.name else "No  manager assigned"
@@ -27,6 +28,7 @@ class ControlCenter(models.Model):
     address = models.CharField(max_length=255, null=True, blank=True)
     contact = models.CharField(max_length=255, null=True, blank=True)
     assigned_collateral_agent = models.ForeignKey(CollateralManager, on_delete=models.CASCADE, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def get_agent_full_name(self):
         if self.assigned_collateral_agent:

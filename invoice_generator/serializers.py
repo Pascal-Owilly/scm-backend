@@ -27,10 +27,14 @@ class BuyerSerializer(serializers.ModelSerializer):
     email = serializers.CharField(source='get_user_email')
     address = serializers.CharField(source='get_user_address')
     country = serializers.CharField(source='get_user_country')
+    formatted_created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = Buyer
-        fields = ['id', 'buyer', 'created_at', 'full_name', 'username', 'email', 'address', 'country']
+        fields = ['id', 'buyer', 'created_at', 'full_name', 'username', 'email', 'address', 'country', 'formatted_created_at']
+
+    def get_formatted_created_at(self, obj):
+        return obj.created_at.strftime('%B %d, %Y %I:%M %p')
 
 
 class InvoiceSerializer(serializers.ModelSerializer):

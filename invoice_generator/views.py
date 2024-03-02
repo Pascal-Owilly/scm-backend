@@ -193,12 +193,12 @@ class InvoiceAllViewSet(viewsets.ModelViewSet):
 # Buyer and quotation
 
 class QuotationAllViewSet(viewsets.ModelViewSet):
-    queryset = Quotation.objects.all()
+    queryset = Quotation.objects.all().order_by('-created_at')
     serializer_class = QuotationSerializer
 
 
 class QuotationViewSet(viewsets.ModelViewSet):
-    queryset = Quotation.objects.all()
+    queryset = Quotation.objects.all().order_by('-created_at')
     serializer_class = QuotationSerializer
     permission_classes = [IsAuthenticated]
 

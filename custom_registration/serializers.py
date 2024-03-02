@@ -128,12 +128,16 @@ class CustomerServiceSerializer(serializers.ModelSerializer):
 
 # sellers
 class SellerSerializer(serializers.ModelSerializer):
-    full_name = serializers.SerializerMethodField()
+    full_name = serializers.CharField(source='get_full_name')
+    username = serializers.CharField(source='get_user_name')
+    email = serializers.CharField(source='get_user_email')
+    address = serializers.CharField(source='get_user_address')
+    country = serializers.CharField(source='get_user_country')
     formatted_created_at = serializers.SerializerMethodField()
 
     class Meta:
         model = Seller
-        fields = ['id', 'full_name', 'formatted_created_at']
+        fields = ['id', 'seller', 'created_at', 'full_name', 'username', 'email', 'address', 'country', 'formatted_created_at']
 
     def get_full_name(self, obj):
         return obj.get_full_name()

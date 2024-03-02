@@ -4,6 +4,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from invoice_generator.models import Invoice, Buyer, Seller
 from custom_registration.models import CustomUser
+# from transaction.models import BreaderTrade
 from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOICES
 
 # Control centers
@@ -29,6 +30,7 @@ class ControlCenter(models.Model):
     contact = models.CharField(max_length=255, null=True, blank=True)
     assigned_collateral_agent = models.ForeignKey(CollateralManager, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    # control_center = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE, null=True, blank=True)
 
     def get_agent_full_name(self):
         if self.assigned_collateral_agent:

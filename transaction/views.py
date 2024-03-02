@@ -1,7 +1,8 @@
 from rest_framework import viewsets, status
 from rest_framework.response import Response
-from .models import Abattoir, Breader, BreaderTrade, AbattoirPaymentToBreader
-from .serializers import AbattoirSerializer, BreaderSerializer, BreaderTradeSerializer, AbattoirPaymentToBreaderSerializer
+from .models import Abattoir, Breader, BreaderTrade, AbattoirPaymentToBreader, Inventory
+from custom_registration.models import Seller
+from .serializers import AbattoirSerializer, BreaderSerializer, BreaderTradeSerializer, AbattoirPaymentToBreaderSerializer, InventorySerializer
 import logging
 from rest_framework.decorators import action
 from django.http import JsonResponse
@@ -25,6 +26,11 @@ class BreaderViewSet(viewsets.ModelViewSet):
     queryset = Breader.objects.all()
     serializer_class = BreaderSerializer
 
+class InventoryViewSet(viewsets.ModelViewSet):
+    queryset = Inventory.objects.all()
+    serializer_class = InventorySerializer
+
+    
 logger = logging.getLogger(__name__)
 
 class UserSuppliedBreedsViewSet(viewsets.ReadOnlyModelViewSet):
@@ -32,28 +38,28 @@ class UserSuppliedBreedsViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = BreaderTradeSerializer
     permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        # Filter the queryset to show only breeds supplied by the logged-in user
-        return BreaderTrade.objects.filter(breeder=self.request.user)
+    # def get_queryset(self):
+    #     # Filter the queryset to show only breeds supplied by the logged-in user
+    #     return BreaderTrade.objects.filter(breeder=self.request.user)
 
 class BreaderTradeViewSet(viewsets.ModelViewSet):
     queryset = BreaderTrade.objects.all().order_by('-transaction_date')
     serializer_class = BreaderTradeSerializer
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
-    def get_queryset(self):
-        user = self.request.breeder
-        if user.role == 'seller':
-            # Filter the queryset to show only breeds supplied by the breeder associated with the supplier
-            return BreaderTrade.objects.filter(breeder=breeder)
-        else:
-            # For other roles, return an empty queryset
-            return BreaderTrade.objects.none()
+    # def get_queryset(self):
+
+    #         # Retrieve the corresponding Buyer instance based on the user
+    #         buyer = get_object_or_404(Seller, seller=self.request.user)
+
+    #         # Filter invoices based on the retrieved Buyer instance
+    #         return BreaderTrade.objects.filter(seller=seller)
+
 
     def create(self, request, *args, **kwargs):
         try:
             # Get the authenticated breeder (assuming breeder is the trader)
-            breeder = request.breeder
+            breeder = request.user
 
             # Assign the current breeder as the breeder for the newly created trade
             request.data['breeder'] = breeder.id

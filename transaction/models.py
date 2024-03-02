@@ -3,10 +3,12 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phonenumber_field.modelfields import PhoneNumberField
 from custom_registration.models import CustomUser, Bank, Seller
+from logistics.models import ControlCenter
 from datetime import datetime
 import uuid
 import random
 import string
+from logistics.models import ControlCenter
 
 class Breader(models.Model):
 
@@ -58,6 +60,14 @@ class BreaderTrade(models.Model):
 
     def __str__(self):
         return f"{self.breeder.breeder} supplied {self.breeds_supplied} {self.breed}'s to {self.seller} on {self.created_at}"
+
+class Inventory(models.Model):
+    name = models.CharField(max_length=255, blank=True, null=True)
+    trade = models.ManyToManyField(BreaderTrade, null=True, blank=True)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.name
 
 class AbattoirPaymentToBreader(models.Model):
     SENT_TO_BANK = 'payment_initiated'

@@ -88,7 +88,7 @@ class LetterOfCreditSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = LetterOfCredit
-        fields = ['id', 'status', 'buyer', 'lc_document', 'issue_date', 'invoice_number']
+        fields = ['id', 'status', 'buyer', 'lc_document', 'issue_date', 'invoice_number', 'status', 'quotation']
 
     def get_buyer(self, obj):
         return str(obj.buyer) if obj.buyer else None
@@ -99,15 +99,15 @@ class LetterOfCreditSerializer(serializers.ModelSerializer):
         return None
 
 class LogisticsStatusSerializer(serializers.ModelSerializer):
-    invoice = InvoiceSerializer()  # Include the InvoiceSerializer here
+    invoice = InvoiceSerializer()  
 
     class Meta:
         model = LogisticsStatus
         fields = ['id', 'status', 'timestamp', 'invoice']
 
-# Buyer and quotatuin
 class QuotationSerializer(serializers.ModelSerializer):
+    letter_of_credit = LetterOfCreditSerializer(allow_null=True, required=False)
+
     class Meta:
         model = Quotation
-        fields = ['id', 'seller', 'buyer', 'product', 'confirm', 'quantity', 'delivery_time', 'unit_price', 'message', 'created_at']
-
+        fields = ['id', 'seller', 'buyer', 'product', 'confirm', 'quantity', 'delivery_time', 'unit_price', 'market', 'message', 'created_at', 'letter_of_credit']

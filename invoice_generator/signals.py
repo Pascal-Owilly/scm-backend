@@ -1,27 +1,18 @@
-# # invoice_generator/signals.py
-# from django.db.models.signals import post_save
-# from django.dispatch import receiver
-# from django.core.mail import send_mail
-# from .models import PurchaseOrder
-# from django.db.models.signals import Signal
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.core.mail import send_mail
 
-# status_change_signal = Signal()
+from .models import LetterOfCredit
 
-
-# @receiver(post_save, sender=PurchaseOrder)
-# def send_email_on_status_change(sender, instance, **kwargs):
-#     if kwargs.get('created', False):  # Skip if it's a new instance
-#         return
-
-#     # Check if the status field has changed
-#     if instance.status != instance._original_status:
-#         # Notify the buyer
-#         subject = f'Purchase Order Status Change: {instance.status}'
-#         message = f"Dear {instance.buyer.username},\n\nYour purchase order (#{instance.purchase_order_number}) has been updated.\n\nStatus: {instance.status}\n\nThank you!"
-#         from_email = 'pascalouma54@gmail.com'  # Replace with your actual email
-#         to_email = [instance.buyer.username.email]
-
-#         send_mail(subject, message, from_email, to_email, fail_silently=False)
-
-#         # Update the original status to the current status for the next comparison
-#         instance._original_status = instance.status
+@receiver(post_save, sender=LetterOfCredit)
+def send_quotation_to_suppliers(sender, instance, created, **kwargs):
+    if instance.status == 'approved' and instance.quotation is not None:
+        # Ensure instance.quotation is fetched with related data
+        quotation = instance.quotation.select_related('seller', 'buyer').first()
+        if quotation:
+            quotation_content = f"Product: {quotation.product}\nQuantity: {quotation.quantity}\nUnit Price: {quotation.unit_price}\nMessage: {quotation.message}"
+            # Send broadcast to suppliers
+            suppliers_emails = ['pascalouma54@gmail.com', 'pascalouma55@gmail.com']  # Example list of supplier emails
+            subject = 'New Quotation Available'
+            message = f'The following quotation is now available:\n\n{quotation_content}'
+            send_mail(subject, message, 'pascalouma54@gmail.com', suppliers_emails)

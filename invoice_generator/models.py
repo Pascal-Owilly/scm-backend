@@ -6,16 +6,16 @@ from inventory_management.choices import BREED_CHOICES, PART_CHOICES, SALE_CHOIC
 from custom_registration.models import CustomUser, Bank
 from django.utils import timezone
 from datetime import timedelta
-from transaction.models import Abattoir, Breader
+# from transaction.models import Breader
 from custom_registration.models import Seller
 # ---------------Seller Purchase order--------------------------------------------
 
 class PurchaseOrder(models.Model):
     
     # Header Information
-    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE, null=True, blank=True)
+    # seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE, null=True, blank=True)
     date = models.DateField(auto_now_add=True)
-    trader_name = models.ForeignKey(Breader, on_delete=models.CASCADE, null=True, blank=True)
+    # trader_name = models.ForeignKey(Breader, on_delete=models.CASCADE, null=True, blank=True)
     shipping_address = models.TextField()
     confirmed = models.BooleanField(default=False)
     
@@ -76,8 +76,8 @@ class LetterOfCreditSellerToTrader(models.Model):
     ]
     tracking_status = models.CharField(max_length=20, choices=TRACKING_STATUSES, default='in_transit')
 
-    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
-    breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    # seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    # breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
     bank = models.ForeignKey(Bank, on_delete=models.CASCADE)
     lc_number = models.CharField(max_length=100, unique=True)
     date = models.DateField(auto_now_add=True)
@@ -120,9 +120,9 @@ class ProformaInvoiceFromTraderToSeller(models.Model):
     # Header Information
     invoice_number = models.CharField(max_length=100, unique=True)
     date = models.DateField(auto_now_add=True)
-    seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
+    # seller = models.ForeignKey(Abattoir, on_delete=models.CASCADE)
     buyer_address = models.TextField()
-    trader = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    # trader = models.ForeignKey(Breader, on_delete=models.CASCADE)
     seller_address = models.TextField()
 
     # Line Items
@@ -184,6 +184,27 @@ class Buyer(models.Model):
             return self.buyer.username
         return "Unknown"
 
+# Buyer and quotation
+
+class Quotation(models.Model):
+
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+
+    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
+    product = models.CharField(max_length=100)  # Updated field name
+    confirm = models.BooleanField(default=False)
+    quantity = models.PositiveIntegerField()  # Updated field name
+    delivery_time = models.DateField(null=True, blank=True)
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # Updated field name
+    message = models.TextField()  # Updated field name
+    market = models.CharField(max_length=100, null=True, blank=True)  # Updated field name
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Quotation for {self.product} by {self.buyer}"
+
+
 class LetterOfCredit(models.Model):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -197,6 +218,7 @@ class LetterOfCredit(models.Model):
     issue_date = models.DateTimeField(auto_now_add=True)
     expiry_date = models.DateField(auto_now_add=True)
     status = models.CharField(max_length=255, choices=STATUS_CHOICES, default='sent_to_bank')
+    quotation = models.ForeignKey(Quotation, on_delete=models.CASCADE, related_name='letters_of_credit', null=True, blank=True)
 
     # File field for storing uploaded documents
     lc_document = models.FileField(upload_to='lc_documents/', null=True, blank=True)
@@ -251,20 +273,3 @@ def pre_save_invoice(sender, instance, **kwargs):
 
 # -------------------End Buyer---------------------------------------------------------------------------------
 
-# Buyer and quotation
-
-class Quotation(models.Model):
-
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
-
-    buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
-    product = models.CharField(max_length=100)  # Updated field name
-    confirm = models.BooleanField(default=False)
-    quantity = models.PositiveIntegerField()  # Updated field name
-    delivery_time = models.DateField(null=True, blank=True)
-    unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # Updated field name
-    message = models.TextField()  # Updated field name
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    def __str__(self):
-        return f"Quotation for {self.product} by {self.buyer}"

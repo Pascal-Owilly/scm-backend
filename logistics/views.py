@@ -163,9 +163,9 @@ class ArrivedOrderViewSet(viewsets.ModelViewSet):
     serializer_class = ArrivedOrderSerializer
 
 class ControlCenterViewSet(viewsets.ModelViewSet):
-    queryset = ControlCenter.objects.all()
+    queryset = ControlCenter.objects.all().order_by('-created_at')
     serializer_class = ControlCenterSerializer
 
 class CollateralManagerViewSet(viewsets.ModelViewSet):
-    queryset = CollateralManager.objects.all()
+    queryset = CollateralManager.objects.all().order_by('-created_at')
     serializer_class = CollateralManagerSerializer

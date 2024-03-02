@@ -16,7 +16,8 @@ from transaction.views import (
       BreaderTradeViewSet,
        AbattoirPaymentToBreaderViewSet,
        BreaderCountView, UserSuppliedBreedsViewSet,
-        BreaderTradeSingleUserViewSet
+        BreaderTradeSingleUserViewSet,
+        InventoryViewSet
 )
 from inventory_management.views import InventoryBreedViewSet, InventoryBreedSalesViewSet, BreedCutViewSet, BreederTotalSerializer, BreederTotalViewSet, BreedCutTotalViewSet
 from slaughter_house.views import SlaughterhouseRecordViewSet
@@ -140,6 +141,7 @@ router.register(r'breed-cut', BreedCutViewSet)
 router.register(r'slaughtered-list', SlaughterhouseRecordViewSet)
 router.register(r'abattoir-payments', AbattoirPaymentToBreaderViewSet)
 router.register(r'breader-info-trade', BreaderTradeViewSet, basename='breader-trade')
+router.register(r'inventory', InventoryViewSet, basename='inventory')
 
 # 
 router.register(r'abattoir-payments-to-breeder', AbattoirPaymentToBreaderViewSet, basename='abattoir-payments-to-breeder')

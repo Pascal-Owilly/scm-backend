@@ -1,7 +1,7 @@
 # logistics/serializers.py
 from rest_framework import serializers
 from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo, ControlCenter, CollateralManager
-
+from transaction.serializers import BreaderTradeSerializer
 class PackageInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -46,12 +46,13 @@ class ArrivedOrderSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 class ControlCenterSerializer(serializers.ModelSerializer):
-    assiged_agent_full_name = serializers.CharField(source='get_agent_full_name', read_only=True)
+    assigned_agent_full_name = serializers.CharField(source='get_agent_full_name', read_only=True)
     formatted_created_at = serializers.SerializerMethodField()
+    breadertrades = BreaderTradeSerializer(many=True, read_only=True, source='breadertrade_set')  # Include the related BreaderTrade data
 
     class Meta:
         model = ControlCenter       
-        fields = '__all__'
+        fields = ['id', 'name', 'address', 'assigned_agent_full_name', 'formatted_created_at', 'breadertrades']
 
     def get_formatted_created_at(self, obj):
         return obj.created_at.strftime('%B %d, %Y %I:%M %p')

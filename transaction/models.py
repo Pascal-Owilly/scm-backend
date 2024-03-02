@@ -10,11 +10,8 @@ import random
 import string
 from logistics.models import ControlCenter
 
-class Breader(models.Model):
-
+class Breader(models.Model):    
     breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    # breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
 
         return f'{self.breeder.first_name} {self.breeder.last_name} '
@@ -35,6 +32,7 @@ class BreaderTrade(models.Model):
 
     breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+    control_center = models.ForeignKey(ControlCenter, on_delete=models.CASCADE, null=True, blank=True)
     transaction_date = models.DateField(auto_now_add=True)
     breed = models.CharField(max_length=255)
     breeds_supplied = models.PositiveIntegerField(default=0)

@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
 
+
 class Status(models.Model):
     is_dormant = models.BooleanField()  
     status_title = models.CharField(max_length=100)
@@ -162,6 +163,8 @@ class CustomerService(models.Model):
 
 class Seller(models.Model):
     seller = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    breeders = models.ManyToManyField('transaction.Breader')
+
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def get_full_name(self):
@@ -192,8 +195,11 @@ class Seller(models.Model):
             return self.seller.username
         return "Unknown"
 
-    def __str__(self):
-        return f'{self.seller.username}'
+    def create_control_center(self, name):
+        return ControlCenter.objects.create(name=name, seller=self)
+
+    def add_supplier(self, breeder):
+        self.breeders.add(breeder)
 
 class UserProfile(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, null=True)

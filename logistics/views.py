@@ -22,6 +22,10 @@ from django.utils.html import strip_tags
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
+# fetch supplies for each control center
+from django.db.models import Prefetch
+from transaction.models import BreaderTrade
+
 class PackageInfoViewset(viewsets.ModelViewSet):
 
     queryset = PackageInfo.objects.all()
@@ -163,7 +167,9 @@ class ArrivedOrderViewSet(viewsets.ModelViewSet):
     serializer_class = ArrivedOrderSerializer
 
 class ControlCenterViewSet(viewsets.ModelViewSet):
-    queryset = ControlCenter.objects.all().order_by('-created_at')
+    queryset = ControlCenter.objects.prefetch_related(
+        Prefetch('breadertrade_set', queryset=BreaderTrade.objects.all())
+    ).order_by('-created_at')
     serializer_class = ControlCenterSerializer
 
 class CollateralManagerViewSet(viewsets.ModelViewSet):

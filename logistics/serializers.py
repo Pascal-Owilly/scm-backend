@@ -2,6 +2,7 @@
 from rest_framework import serializers
 from .models import LogisticsStatus, Order, ShipmentProgress, ArrivedOrder, PackageInfo, ControlCenter, CollateralManager
 from transaction.serializers import BreaderTradeSerializer
+
 class PackageInfoSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -25,7 +26,6 @@ class LogisticsStatusSerializer(serializers.ModelSerializer):
         #     representation['buyer_full_name'] = "Unknown"
         #     representation['seller_full_name'] = "Unknown"
         # return representation
-
 
 class OrderSerializer(serializers.ModelSerializer):
     # Update the source to use 'id' instead of 'invoice.invoice_number'
@@ -52,11 +52,11 @@ class ControlCenterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ControlCenter       
-        fields = ['id', 'name', 'address', 'assigned_agent_full_name', 'formatted_created_at', 'breadertrades']
+        # fields = ['id', 'name', 'address', 'assigned_agent_full_name', 'formatted_created_at', 'breadertrades']
+        fields = '__all__'
 
     def get_formatted_created_at(self, obj):
         return obj.created_at.strftime('%B %d, %Y %I:%M %p')
-
 
 class CollateralManagerSerializer(serializers.ModelSerializer):
     full_name = serializers.CharField(source='get_full_name', read_only=True)

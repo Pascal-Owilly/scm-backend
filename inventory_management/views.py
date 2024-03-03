@@ -7,6 +7,8 @@ from slaughter_house.models import SlaughterhouseRecord
 from django.db.models import Sum
 from rest_framework.response import Response
 
+from logistics.models import ControlCenter
+
 class InventoryBreedViewSet(viewsets.ModelViewSet):
     queryset = InventoryBreed.objects.all()
     serializer_class = InventoryBreedSerializer
@@ -77,17 +79,17 @@ class BreederTotalViewSet(viewsets.ViewSet):
                 print(f"Breed: {breed}, Slaughtered Quantity: {slaughtered_quantity['total_slaughtered']}, Total Breed Supply: {total_dict[breed]['total_breed_supply']}")
                 
                 # Check if breed exists in breeder_totals before subtracting
-                if breed in total_dict:
-                    # Validate before subtracting
-                    remaining_breed_supply = total_dict[breed]['total_breed_supply'] - slaughtered_quantity['total_slaughtered']
-                    print(f"Remaining Breed Supply after slaughter: {remaining_breed_supply}")
+                # if breed in total_dict:
+                #     # Validate before subtracting
+                #     remaining_breed_supply = total_dict[breed]['total_breed_supply'] - slaughtered_quantity['total_slaughtered']
+                #     print(f"Remaining Breed Supply after slaughter: {remaining_breed_supply}")
                     
-                    if remaining_breed_supply < 0:
-                        raise ValidationError(f"Cannot slaughter {slaughtered_quantity['total_slaughtered']} of breed {breed}. Insufficient breed supply.")
+                #     if remaining_breed_supply < 0:
+                #         raise ValidationError(f"Cannot slaughter {slaughtered_quantity['total_slaughtered']} of breed {breed}. Insufficient breed supply.")
                     
-                    total_dict[breed]['total_breed_supply'] = remaining_breed_supply
-                else:
-                    raise ValidationError(f"Breed {breed} not found in breeder_totals.")
+                #     total_dict[breed]['total_breed_supply'] = remaining_breed_supply
+                # else:
+                #     raise ValidationError(f"Breed {breed} not found in breeder_totals.")
 
 # Rest of your code...
 

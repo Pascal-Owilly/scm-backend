@@ -189,8 +189,6 @@ router.register(r'arrived-order', ArrivedOrderViewSet, basename='arrived-order')
 # router.register(r'items', ItemViewSet, basename='item')
 # router.register(r'purchase-orders', PurchaseOrderViewSet, basename='purchaseorder')
 
-
-
 # Invoice
 
 # Create a router and register our viewsets with it.

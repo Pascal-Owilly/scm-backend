@@ -21,6 +21,8 @@ class SlaughterhouseRecord(models.Model):
     status = models.CharField(max_length=255, choices=SLAUGHTER_STATUS_CHOICES, default='slaughtered')
     # sale_choice = models.CharField(max_length=255, choices=SALE_CHOICES, default='export_cuts')
     weight = models.PositiveIntegerField(null=True, blank=True)
+    confirm = models.BooleanField(default=False)  # Dual Confirm that the record is correct before saving it to
+    
     def __str__(self):
         return f"Slaughterhouse Record - Date: {self.slaughter_date}, Breed: {self.get_breed_display()}, Quantity: {self.quantity}"
 

@@ -9,6 +9,7 @@ import uuid
 import random
 import string
 from logistics.models import ControlCenter
+from django.utils import timezone
 
 class Breader(models.Model):    
     breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
@@ -27,7 +28,6 @@ class Abattoir(models.Model):
         return f'{self.user.first_name} {self.user.last_name} '
 
 class BreaderTrade(models.Model):
-            
     PRODUCTS = []
 
     breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
@@ -50,11 +50,16 @@ class BreaderTrade(models.Model):
     def save(self, *args, **kwargs):
         # Generate a unique reference when saving the object
         if not self.reference:
-            # Use the current date and time if transaction_date is None
-            transaction_date = self.transaction_date or datetime.now()
+            transaction_date = self.transaction_date or timezone.now()
             self.reference = f"{transaction_date.strftime('%y%m%d%H%M')}"
 
         super().save(*args, **kwargs)
+
+        # # Deduct breeds supplied from the associated ControlCenter
+        # if self.control_center:
+        #     control_center = self.control_center
+        #     control_center.total_breed_supply -= self.breeds_supplied
+        #     control_center.save()
 
     def __str__(self):
         return f"{self.breeder.breeder} supplied {self.breeds_supplied} {self.breed}'s to {self.seller} on {self.created_at}"

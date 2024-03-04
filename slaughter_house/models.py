@@ -5,6 +5,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 # from inventory_management.models import InventoryBreed, InventoryBreedSales
 # from transaction.models import BreaderTrade
+from logistics.models import ControlCenter
+
 
 class SlaughterhouseRecord(models.Model):
 
@@ -14,6 +16,7 @@ class SlaughterhouseRecord(models.Model):
 
     breed = models.CharField(max_length=255, null=True, blank=True, default='goats')
     slaughter_date = models.DateField(auto_now_add=True)
+    control_center = models.ForeignKey(ControlCenter, on_delete=models.CASCADE, null=True, blank=True)
     # part_name = models.CharField(max_length=255, choices=PART_CHOICES, default='shanks')
     quantity = models.PositiveIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
@@ -24,7 +27,7 @@ class SlaughterhouseRecord(models.Model):
     confirm = models.BooleanField(default=False)  # Dual Confirm that the record is correct before saving it to
     
     def __str__(self):
-        return f"Slaughterhouse Record - Date: {self.slaughter_date}, Breed: {self.get_breed_display()}, Quantity: {self.quantity}"
+        return f"Slaughterhouse Record - Date: {self.slaughter_date}, Quantity: {self.quantity}"
 
 
     

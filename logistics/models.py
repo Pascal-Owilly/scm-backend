@@ -20,6 +20,31 @@ class CollateralManager(models.Model):
     def get_associated_seller_full_name(self):
         return self.associated_seller.get_full_name() if self.associated_seller else "No seller assigned"
 
+    def get_user_name(self):
+        if self.name:
+            return self.name.username
+        return "Unknown"
+
+    def get_user_email(self):
+        if self.name:
+            return self.name.email
+        return "Unknown"    
+
+    def get_user_country(self):
+        if self.name:
+            return self.name.country
+        return "Unknown"
+
+    def get_user_address(self):
+        if self.name:
+            return self.name.address
+        return "Unknown"
+
+    def __str__(self):
+        if self.name:
+            return self.name.username
+        return "Unknown"
+
     def __str__(self):
         return self.name.username if self.name else "Unnamed Collateral Manager"
 
@@ -40,6 +65,7 @@ class ControlCenter(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Order(models.Model):
     order_number = models.CharField(max_length=20)

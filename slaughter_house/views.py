@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class SlaughterhouseRecordViewSet(viewsets.ModelViewSet):
 
-    queryset = SlaughterhouseRecord.objects.all()
+    queryset = SlaughterhouseRecord.objects.all().order_by('-created_at')
     serializer_class = SlaughterhouseRecordSerializer
 
 @csrf_exempt
@@ -75,13 +75,10 @@ def compare_weight_loss(request):
         return JsonResponse({'error': 'Only GET requests are supported for this endpoint'}, status=405)
 
 def supply_vs_demand_statistics(request):
-    # Get total bred quantities per breed
     bred_quantities = BreaderTrade.objects.values('breed').annotate(total_bred=Sum('breeds_supplied'))
 
-    # Get total slaughtered quantities per breed
     slaughtered_quantities = SlaughterhouseRecord.objects.values('breed').annotate(total_slaughtered=Sum('quantity'))
 
-    # Combine the data for supply vs demand comparison
     supply_vs_demand_data = []
 
     for bred_quantity in bred_quantities:
@@ -102,6 +99,7 @@ def supply_vs_demand_statistics(request):
             'breed': breed,
             'total_bred': total_bred,
             'total_slaughtered': slaughtered_quantity,
+            # Include control center data if needed
         })
 
     return JsonResponse({'supply_vs_demand_data': supply_vs_demand_data})

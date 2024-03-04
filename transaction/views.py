@@ -42,31 +42,33 @@ class UserSuppliedBreedsViewSet(viewsets.ReadOnlyModelViewSet):
     #     # Filter the queryset to show only breeds supplied by the logged-in user
     #     return BreaderTrade.objects.filter(breeder=self.request.user)
 
+
+
 class BreaderTradeViewSet(viewsets.ModelViewSet):
     queryset = BreaderTrade.objects.all().order_by('-transaction_date')
     serializer_class = BreaderTradeSerializer
     # permission_classes = [IsAuthenticated]
-
-    # def get_queryset(self):
-
-    #         # Retrieve the corresponding Buyer instance based on the user
-    #         buyer = get_object_or_404(Seller, seller=self.request.user)
-
-    #         # Filter invoices based on the retrieved Buyer instance
-    #         return BreaderTrade.objects.filter(seller=seller)
-
 
     def create(self, request, *args, **kwargs):
         try:
             # Get the authenticated breeder (assuming breeder is the trader)
             breeder = request.user
 
-            # Assign the current breeder as the breeder for the newly created trade
-            request.data['breeder'] = breeder.id
+            # Create a mutable copy of the request data
+            mutable_data = request.data.copy()
 
-            serializer = self.get_serializer(data=request.data)
+            # Assign the current breeder as the breeder for the newly created trade
+            mutable_data['breeder'] = breeder.id
+
+            serializer = self.get_serializer(data=mutable_data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
+
+            # Deduct breeds supplied from the associated ControlCenter
+            if serializer.instance.control_center:
+                control_center = serializer.instance.control_center
+                control_center.save()
+
             headers = self.get_success_headers(serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
         except Exception as e:

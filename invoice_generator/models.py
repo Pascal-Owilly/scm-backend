@@ -38,10 +38,7 @@ class PurchaseOrder(models.Model):
     #-------------Seller LC------------------------------------------------
 
 class LetterOfCreditSellerToTrader(models.Model):
-    # Header Information
 
-   
-    # Terms and Conditions
     # Define choices for shipment periods
     SHIPMENT_PERIODS = [
         ('immediate', 'Immediate'),
@@ -117,6 +114,7 @@ class LetterOfCreditSellerToTrader(models.Model):
 # ---------------Profoma invoice from traser to seller
 
 class ProformaInvoiceFromTraderToSeller(models.Model):
+
     # Header Information
     invoice_number = models.CharField(max_length=100, unique=True)
     date = models.DateField(auto_now_add=True)
@@ -230,7 +228,6 @@ class DocumentToSeller(models.Model):
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE)
     message = models.CharField(max_length=255, null=True, blank=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
-
 
 class Invoice(models.Model):
     breed = models.CharField(max_length=255)

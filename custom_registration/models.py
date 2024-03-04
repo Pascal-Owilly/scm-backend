@@ -168,7 +168,7 @@ class Seller(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
 
     def get_full_name(self):
-        return f'{self.seller.first_name} {self.seller.last_name} '
+        return f'{self.seller.first_name} {self.seller.last_name} {self.seller.username}'
 
     def get_user_name(self):
         if self.seller:

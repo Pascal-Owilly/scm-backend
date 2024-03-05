@@ -110,4 +110,4 @@ class QuotationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Quotation
-        fields = ['id', 'seller', 'buyer', 'product', 'confirm', 'quantity', 'delivery_time', 'unit_price', 'market', 'message', 'created_at', 'letter_of_credit']
+        fields = ['id', 'seller', 'buyer', 'product', 'confirm', 'quantity', 'delivery_time', 'unit_price', 'market', 'message', 'status', 'created_at', 'letter_of_credit']

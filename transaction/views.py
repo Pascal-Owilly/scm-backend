@@ -45,7 +45,7 @@ class UserSuppliedBreedsViewSet(viewsets.ReadOnlyModelViewSet):
 class BreaderTradeViewSet(viewsets.ModelViewSet):
     queryset = BreaderTrade.objects.all().order_by('-transaction_date')
     serializer_class = BreaderTradeSerializer
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
 
     # def get_queryset(self):
 

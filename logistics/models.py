@@ -20,6 +20,31 @@ class CollateralManager(models.Model):
     def get_associated_seller_full_name(self):
         return self.associated_seller.get_full_name() if self.associated_seller else "No seller assigned"
 
+    def get_user_name(self):
+        if self.name:
+            return self.name.username
+        return "Unknown"
+
+    def get_user_email(self):
+        if self.name:
+            return self.name.email
+        return "Unknown"    
+
+    def get_user_country(self):
+        if self.name:
+            return self.name.country
+        return "Unknown"
+
+    def get_user_address(self):
+        if self.name:
+            return self.name.address
+        return "Unknown"
+
+    def __str__(self):
+        if self.name:
+            return self.name.username
+        return "Unknown"
+
     def __str__(self):
         return self.name.username if self.name else "Unnamed Collateral Manager"
 
@@ -28,9 +53,9 @@ class ControlCenter(models.Model):
     location = models.CharField(max_length=100, null=True, blank=True)
     address = models.CharField(max_length=255, null=True, blank=True)
     contact = models.CharField(max_length=255, null=True, blank=True)
+    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     assigned_collateral_agent = models.ForeignKey(CollateralManager, on_delete=models.CASCADE, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-    # control_center = models.ForeignKey(BreaderTrade, on_delete=models.CASCADE, null=True, blank=True)
 
     def get_agent_full_name(self):
         if self.assigned_collateral_agent:
@@ -40,6 +65,7 @@ class ControlCenter(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Order(models.Model):
     order_number = models.CharField(max_length=20)
@@ -97,6 +123,20 @@ class LogisticsStatus(models.Model):
     package_info = models.ForeignKey(PackageInfo, on_delete=models.CASCADE, blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)
     is_status_updated = models.BooleanField(default=False)
+
+    def get_seller_full_name(self):
+        try:
+            return f'{self.seller.seller.first_name} {self.seller.seller.last_name}'
+        except AttributeError:
+            return None
+
+    def get_buyer_full_name(self):
+        try:
+            return f'{self.buyer.buyer.first_name} {self.buyer.buyer.last_name}'
+        except AttributeError:
+            return None
+
+
     
     def save(self, *args, **kwargs):
         # Populate buyer and seller from the associated invoice
@@ -107,8 +147,10 @@ class LogisticsStatus(models.Model):
                 self.seller = invoice.seller
         super().save(*args, **kwargs)
 
+    
 
-    @property
+
+    @property       
     def is_arrived(self):
         return self.status == 'arrived'
 

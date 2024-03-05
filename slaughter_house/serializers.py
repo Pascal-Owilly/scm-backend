@@ -3,6 +3,10 @@ from slaughter_house.models import SlaughterhouseRecord
 
 class SlaughterhouseRecordSerializer(serializers.ModelSerializer):
     quantity_left = serializers.ReadOnlyField()  # Add this line to include quantity_left
+    control_center_name = serializers.SerializerMethodField()  # Add this line to include control_center_name
+
+    def get_control_center_name(self, obj):
+        return obj.control_center.name if obj.control_center else None
 
     class Meta:
         model = SlaughterhouseRecord

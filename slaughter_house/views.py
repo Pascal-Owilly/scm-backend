@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class SlaughterhouseRecordViewSet(viewsets.ModelViewSet):
 
-    queryset = SlaughterhouseRecord.objects.all()
+    queryset = SlaughterhouseRecord.objects.all().order_by('-slaughter_date')
     serializer_class = SlaughterhouseRecordSerializer
 
 @csrf_exempt

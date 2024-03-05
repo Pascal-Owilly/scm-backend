@@ -9,12 +9,12 @@ import uuid
 import random
 import string
 from logistics.models import ControlCenter
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
-class Breader(models.Model):
 
+class Breader(models.Model):    
     breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    # breeder = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
-    seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
     def __str__(self):
 
         return f'{self.breeder.first_name} {self.breeder.last_name} '
@@ -30,11 +30,9 @@ class Abattoir(models.Model):
         return f'{self.user.first_name} {self.user.last_name} '
 
 class BreaderTrade(models.Model):
-            
-    PRODUCTS = []
-
-    breeder = models.ForeignKey(Breader, on_delete=models.CASCADE)
+    breeder = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
+    control_center = models.ForeignKey(ControlCenter, on_delete=models.CASCADE, null=True, blank=True)
     transaction_date = models.DateField(auto_now_add=True)
     breed = models.CharField(max_length=255)
     breeds_supplied = models.PositiveIntegerField(default=0)
@@ -47,19 +45,19 @@ class BreaderTrade(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     price = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
     reference = models.CharField(max_length=20, unique=True, editable=False)
-    # confirmation_code = models.CharField(max_length=6, null=True, blank=True)
 
     def save(self, *args, **kwargs):
-        # Generate a unique reference when saving the object
+        super().save(*args, **kwargs)
+
+    def save(self, *args, **kwargs):
         if not self.reference:
-            # Use the current date and time if transaction_date is None
-            transaction_date = self.transaction_date or datetime.now()
-            self.reference = f"{transaction_date.strftime('%y%m%d%H%M')}"
+            # Generate a unique reference if it doesn't exist
+            self.reference = f"{timezone.now().strftime('%y%m%d%H%M%S')}_{uuid.uuid4().hex[:6]}"
 
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.breeder.breeder} supplied {self.breeds_supplied} {self.breed}'s to {self.seller} on {self.created_at}"
+        return f"{self.breeder.first_name} {self.breeder.last_name} supplied {self.breeds_supplied} {self.breed}'s to {self.seller} on {self.created_at}"
 
 class Inventory(models.Model):
     name = models.CharField(max_length=255, blank=True, null=True)

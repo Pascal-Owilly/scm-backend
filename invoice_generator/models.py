@@ -188,6 +188,11 @@ class Buyer(models.Model):
 
 class Quotation(models.Model):
 
+    STATUS_CHOICES = [
+        ('active', 'Active'),
+        ('closed', 'Closed'),
+    ]
+
     seller = models.ForeignKey(Seller, on_delete=models.CASCADE, null=True, blank=True)
 
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
@@ -198,6 +203,7 @@ class Quotation(models.Model):
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)  # Updated field name
     message = models.TextField()  # Updated field name
     market = models.CharField(max_length=100, null=True, blank=True)  # Updated field name
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='active')  # New field for status
 
     created_at = models.DateTimeField(auto_now_add=True)
 

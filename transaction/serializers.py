@@ -21,12 +21,11 @@ class BreaderSerializer(serializers.ModelSerializer):
 
     
 class BreaderTradeSerializer(serializers.ModelSerializer):
+    breeder_first_name = serializers.CharField(source='breeder.first_name', read_only=True)
+    breeder_last_name = serializers.CharField(source='breeder.last_name', read_only=True)
     breeder_market = serializers.CharField(source='breeder.market', read_only=True)
     breeder_community = serializers.CharField(source='breeder.community', read_only=True)
     breeder_head_of_family = serializers.CharField(source='breeder.head_of_family', read_only=True)
-
-    breeder_first_name = serializers.CharField(source='breeder.first_name', read_only=True)
-    breeder_last_name = serializers.CharField(source='breeder.last_name', read_only=True)
 
     class Meta:
         model = BreaderTrade
